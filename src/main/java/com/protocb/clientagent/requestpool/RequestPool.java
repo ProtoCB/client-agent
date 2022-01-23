@@ -9,10 +9,10 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.concurrent.Semaphore;
 
-import static com.protocb.clientagent.Config.GlobalVariables.BUFFER_SIZE;
+import static com.protocb.clientagent.config.GlobalVariables.BUFFER_SIZE;
 
 @Component
-public class RequestPool implements IRequestPool, Observer {
+public class RequestPool implements Observer {
 
     @Autowired
     private AgentState agentState;
@@ -26,8 +26,8 @@ public class RequestPool implements IRequestPool, Observer {
     @PostConstruct
     private void postContruct() {
         this.enabled = false;
-        this.availableRequests = new Semaphore(0);
-        this.emptyRequestSlots = new Semaphore(BUFFER_SIZE);
+        this.availableRequests = new Semaphore(0, true);
+        this.emptyRequestSlots = new Semaphore(BUFFER_SIZE, true);
         agentState.registerObserver(this);
     }
 
@@ -36,7 +36,6 @@ public class RequestPool implements IRequestPool, Observer {
         agentState.removeObserver(this);
     }
 
-    @Override
     public void fetchRequestOrWait(){
         try {
 
@@ -54,12 +53,12 @@ public class RequestPool implements IRequestPool, Observer {
         this.enabled = agentState.isAlive();
     }
 
-    @Override
     public void addRequestToPool() {
         try {
             if(enabled) {
                 emptyRequestSlots.acquire();
                 availableRequests.release();
+                System.out.println("Added Request");
             } else {
                 availableRequests.drainPermits();
                 int occupiedSlots = BUFFER_SIZE - emptyRequestSlots.availablePermits();
