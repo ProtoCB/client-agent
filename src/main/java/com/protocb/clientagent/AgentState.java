@@ -2,10 +2,9 @@ package com.protocb.clientagent;
 
 import com.protocb.clientagent.interaction.Observer;
 import com.protocb.clientagent.interaction.Subject;
-import com.protocb.clientagent.requestpool.RequestPool;
+import com.protocb.clientagent.requestpool.IRequestPool;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,9 +24,6 @@ public class AgentState implements Subject {
     private String serverUrl;
 
     private float tfProbability;
-
-    @Autowired
-    private RequestPool requestPool;
 
     private ArrayList<Observer> observers = new ArrayList<>();
 
@@ -72,8 +68,4 @@ public class AgentState implements Subject {
         this.notifyObservers();
     }
 
-    public void setRequestPool(RequestPool requestPool) {
-        this.requestPool = requestPool;
-        this.notifyObservers();
-    }
 }
