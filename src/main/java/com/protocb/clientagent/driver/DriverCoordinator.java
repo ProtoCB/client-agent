@@ -36,12 +36,14 @@ public class DriverCoordinator implements Observer {
     }
 
     public void enableDriver() {
+        System.out.println("Enabling driver");
         disableDriver();
         driverTask = scheduledExecutorService.schedule(driver, 0, TimeUnit.MILLISECONDS);
     }
 
     public void disableDriver() {
         if(isDriverActive()) {
+            System.out.println("Disabling driver");
             driverTask.cancel(true);
         }
     }

@@ -42,8 +42,9 @@ public class RequestPool implements Observer {
             availableRequests.acquire();
             emptyRequestSlots.release();
 
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+//            e.printStackTrace();
+            System.out.println("Fetch request failed");
             // TODO: Log error to file
         }
     }
@@ -63,7 +64,8 @@ public class RequestPool implements Observer {
                 resetPool();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
+            System.out.printf("Adding request failed");
             // TODO: Log error to file
         }
     }

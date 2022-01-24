@@ -20,6 +20,7 @@ public class Driver implements Runnable {
             while(true) {
                 requestPool.fetchRequestOrWait();
                 proxy.sendRequestToServer();
+                Thread.sleep(1000);
             }
         } catch (Exception e) {
             System.out.println("Driver Interrupted");

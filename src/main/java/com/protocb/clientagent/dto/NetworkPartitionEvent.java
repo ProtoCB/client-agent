@@ -7,7 +7,7 @@ import java.util.List;
 
 @Data
 @Builder
-public class NetworkPartition {
+public class NetworkPartitionEvent {
 
     private boolean networkPartitioned;
 

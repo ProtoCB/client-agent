@@ -39,6 +39,7 @@ public class RequestGenerationAgent implements Observer {
 
     public void generateRequestsAtDelay(int delayInMilliseconds) {
         disableRequestGeneration();
+        System.out.println("Starting request generation @ " + delayInMilliseconds + " milSec");
         generatorTask = scheduledExecutorService.scheduleWithFixedDelay(requestGenerator, 0, delayInMilliseconds, TimeUnit.MILLISECONDS);
     }
 

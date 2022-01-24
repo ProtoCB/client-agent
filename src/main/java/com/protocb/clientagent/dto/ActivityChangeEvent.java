@@ -1,10 +1,12 @@
 package com.protocb.clientagent.dto;
 
 import com.protocb.clientagent.config.ActivityState;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
-public class ActivityEvent {
+@Builder
+public class ActivityChangeEvent {
 
     private long time;
     private ActivityState state;

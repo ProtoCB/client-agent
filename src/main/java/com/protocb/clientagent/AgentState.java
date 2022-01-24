@@ -66,11 +66,13 @@ public class AgentState implements Subject {
     }
 
     public void setAlive(boolean alive) {
+        System.out.println("Alive = " + alive);
         this.alive = alive;
         this.notifyObservers();
     }
 
     public void setNetworkPartition(boolean networkPartitioned, List<String> partitionMembers) {
+        System.out.println("Partition = " + networkPartitioned);
         this.networkPartitioned = networkPartitioned;
         this.partitionMembers = partitionMembers;
         this.notifyObservers();
@@ -101,6 +103,7 @@ public class AgentState implements Subject {
     }
 
     public void setExperimentUnderProgress(boolean experimentUnderProgress) {
+        System.out.println("Experiment = " + experimentUnderProgress);
         this.experimentUnderProgress = experimentUnderProgress;
         this.notifyObservers();
     }

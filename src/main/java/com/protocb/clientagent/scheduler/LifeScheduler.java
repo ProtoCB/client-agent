@@ -1,7 +1,9 @@
-package com.protocb.clientagent.scheduler.serveravailability;
+package com.protocb.clientagent.scheduler;
 
+import com.protocb.clientagent.AgentState;
 import com.protocb.clientagent.config.ActivityState;
-import com.protocb.clientagent.dto.ActivityEvent;
+import com.protocb.clientagent.dto.ActivityChangeEvent;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,19 +16,33 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 @Component
-public class ServerAvailabilityScheduler {
+public class LifeScheduler {
+
+    @Autowired
+    private AgentState agentState;
 
     @Autowired
     private ScheduledExecutorService scheduledExecutorService;
-
-    @Autowired
-    private ServerAvailabilitySchedulingTask serverAvailabilitySchedulingTask;
 
     private List<ActivityState> activityStates;
 
     private List<ScheduledFuture> schedule;
 
     private int nextEventIndex;
+
+    @NoArgsConstructor
+    private class LifeSchedulingTask implements Runnable {
+        @Override
+        public void run() {
+            ActivityState activityState = getNextState();
+            if(activityState == ActivityState.ACTIVE) {
+                agentState.setAlive(true);
+            } else {
+                agentState.setAlive(false);
+            }
+        }
+    }
+
 
     @PostConstruct
     public void postConstruct() {
@@ -44,16 +60,19 @@ public class ServerAvailabilityScheduler {
         activityStates.clear();
     }
 
-    public void scheduleExperiment(List<ActivityEvent> events) {
-        for(ActivityEvent event : events) {
-            long delay = event.getTime() - Instant.now().toEpochMilli();
+    public void scheduleExperiment(List<ActivityChangeEvent> events) {
+        for(ActivityChangeEvent event : events) {
+            long delay = event.getTime() - Instant.now().getEpochSecond();
+
             if(delay <= 0) {
-                System.out.println("Not scheduling past event");
+                System.out.println("Not scheduling past event life");
                 //TODO: Log error to file
                 continue;
             }
+
             activityStates.add(event.getState());
-            scheduledExecutorService.schedule(serverAvailabilitySchedulingTask, delay, TimeUnit.MILLISECONDS);
+
+            scheduledExecutorService.schedule(new LifeSchedulingTask(), delay, TimeUnit.SECONDS);
         }
         nextEventIndex = activityStates.size() != 0 ? 0 : -1;
     }
@@ -71,3 +90,4 @@ public class ServerAvailabilityScheduler {
     }
 
 }
+

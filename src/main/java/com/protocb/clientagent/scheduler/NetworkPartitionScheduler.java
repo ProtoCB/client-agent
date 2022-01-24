@@ -1,6 +1,8 @@
-package com.protocb.clientagent.scheduler.networkpartition;
+package com.protocb.clientagent.scheduler;
 
-import com.protocb.clientagent.dto.NetworkPartition;
+import com.protocb.clientagent.AgentState;
+import com.protocb.clientagent.dto.NetworkPartitionEvent;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,16 +18,25 @@ import java.util.concurrent.TimeUnit;
 public class NetworkPartitionScheduler {
 
     @Autowired
-    private ScheduledExecutorService scheduledExecutorService;
+    private AgentState agentState;
 
     @Autowired
-    private NetworkPartitionSchedulingTask networkPartitionSchedulingTask;
+    private ScheduledExecutorService scheduledExecutorService;
 
-    private List<NetworkPartition> partitions;
+    private List<NetworkPartitionEvent> partitions;
 
     private List<ScheduledFuture> schedule;
 
     private int nextEventIndex;
+
+    @NoArgsConstructor
+    private class NetworkPartitionSchedulingTask implements Runnable {
+        @Override
+        public void run() {
+            NetworkPartitionEvent networkPartitionEvent = getNextPartition();
+            agentState.setNetworkPartition(networkPartitionEvent.isNetworkPartitioned(), networkPartitionEvent.getPartition());
+        }
+    }
 
     @PostConstruct
     public void postConstruct() {
@@ -43,26 +54,29 @@ public class NetworkPartitionScheduler {
         partitions.clear();
     }
 
-    public void scheduleExperiment(List<NetworkPartition> events) {
-        for(NetworkPartition event : events) {
-            long delay = event.getTime() - Instant.now().toEpochMilli();
+    public void scheduleExperiment(List<NetworkPartitionEvent> events) {
+        for(NetworkPartitionEvent event : events) {
+            long delay = event.getTime() - Instant.now().getEpochSecond();
+
             if(delay <= 0) {
-                System.out.println("Not scheduling past event");
+                System.out.println("Not scheduling past event np");
                 //TODO: Log error to file
                 continue;
             }
+
             partitions.add(event);
-            scheduledExecutorService.schedule(networkPartitionSchedulingTask, delay, TimeUnit.MILLISECONDS);
+
+            scheduledExecutorService.schedule( new NetworkPartitionSchedulingTask(), delay, TimeUnit.SECONDS);
         }
         nextEventIndex = partitions.size() != 0 ? 0 : -1;
     }
 
-    public NetworkPartition getNextPartition() {
+    private NetworkPartitionEvent getNextPartition() {
 
         if(nextEventIndex < 0) {
             System.out.println("Something wrong with schedule");
             //TODO: Log error to file
-            return NetworkPartition.builder().networkPartitioned(false).partition(new ArrayList<String>()).build();
+            return NetworkPartitionEvent.builder().networkPartitioned(false).partition(new ArrayList<String>()).build();
         }
 
         return partitions.get(nextEventIndex++);
@@ -71,3 +85,4 @@ public class NetworkPartitionScheduler {
 
 
 }
+
