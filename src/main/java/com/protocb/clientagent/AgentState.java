@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
+import java.util.List;
 
 @Component
 @Getter
@@ -16,11 +17,15 @@ public class AgentState implements Subject {
 
     private String experimentSession;
 
+    private boolean experimentUnderProgress;
+
     private boolean alive;
 
     private boolean networkPartitioned;
 
-    private ArrayList<String> partitionMembers;
+    private List<String> partitionMembers;
+
+    private boolean serverAvailable;
 
     private String serverUrl;
 
@@ -28,15 +33,19 @@ public class AgentState implements Subject {
 
     private ArrayList<Observer> observers;
 
+    private float requestsPerSecond;
+
     @PostConstruct
     private void postContruct() {
-        this.alive = true;//false;
+        this.alive = false;
         this.networkPartitioned = false;
         this.experimentSession = "Uninitialized";
         this.partitionMembers = new ArrayList<>();
         this.serverUrl = "Uninitialized";
         this.tfProbability = 0;
         this.observers = new ArrayList<>();
+        this.requestsPerSecond = 0;
+        this.experimentUnderProgress = false;
     }
 
     @Override
@@ -58,22 +67,18 @@ public class AgentState implements Subject {
 
     public void setAlive(boolean alive) {
         this.alive = alive;
-        System.out.println("Agent Alive");
         this.notifyObservers();
     }
 
-    public void setNetworkPartitioned(boolean networkPartitioned) {
+    public void setNetworkPartition(boolean networkPartitioned, List<String> partitionMembers) {
         this.networkPartitioned = networkPartitioned;
-        this.notifyObservers();
-    }
-
-    public void setPartitionMembers(ArrayList<String> partitionMembers) {
         this.partitionMembers = partitionMembers;
         this.notifyObservers();
     }
 
     public void setServerUrl(String serverUrl) {
         this.serverUrl = serverUrl;
+        this.notifyObservers();
     }
 
     public void setTfProbability(float tfProbability) {
@@ -83,5 +88,20 @@ public class AgentState implements Subject {
 
     public void setExperimentSession(String experimentSession) {
         this.experimentSession = experimentSession;
+    }
+
+    public void setServerAvailable(boolean serverAvailable) {
+        this.serverAvailable = serverAvailable;
+        this.notifyObservers();
+    }
+
+    public void setRequestsPerSecond(float requestsPerSecond) {
+        this.requestsPerSecond = requestsPerSecond;
+        this.notifyObservers();
+    }
+
+    public void setExperimentUnderProgress(boolean experimentUnderProgress) {
+        this.experimentUnderProgress = experimentUnderProgress;
+        this.notifyObservers();
     }
 }

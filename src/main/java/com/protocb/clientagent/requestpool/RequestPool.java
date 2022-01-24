@@ -25,7 +25,7 @@ public class RequestPool implements Observer {
 
     @PostConstruct
     private void postContruct() {
-        this.enabled = true;//false;
+        this.enabled = false;
         this.availableRequests = new Semaphore(0, true);
         this.emptyRequestSlots = new Semaphore(BUFFER_SIZE, true);
         agentState.registerObserver(this);

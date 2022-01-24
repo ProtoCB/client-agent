@@ -15,6 +15,8 @@ public class Proxy implements Observer {
     @Autowired
     private AgentState agentState;
 
+    private boolean networkPartitioned;
+
     private List<String> allowList;
 
     private boolean serverAvailable;
@@ -27,8 +29,10 @@ public class Proxy implements Observer {
     private void postContruct() {
         allowList = new ArrayList<>();
         serverAvailable = false;
+        networkPartitioned = false;
+        serverUrl = "Uninitialized";
+        tfProbability = 0;
         agentState.registerObserver(this);
-        this.update();
     }
 
     @PreDestroy
@@ -39,6 +43,9 @@ public class Proxy implements Observer {
     @Override
     public void update() {
         this.serverUrl = agentState.getServerUrl();
+        this.serverAvailable = agentState.isServerAvailable();
+        this.networkPartitioned = agentState.isNetworkPartitioned();
+        this.allowList = agentState.getPartitionMembers();
         this.tfProbability = agentState.getTfProbability();
     }
 
