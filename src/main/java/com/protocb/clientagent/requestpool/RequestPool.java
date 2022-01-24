@@ -25,7 +25,7 @@ public class RequestPool implements Observer {
 
     @PostConstruct
     private void postContruct() {
-        this.enabled = false;
+        this.enabled = true;//false;
         this.availableRequests = new Semaphore(0, true);
         this.emptyRequestSlots = new Semaphore(BUFFER_SIZE, true);
         agentState.registerObserver(this);
@@ -60,17 +60,30 @@ public class RequestPool implements Observer {
                 availableRequests.release();
                 System.out.println("Added Request");
             } else {
-                availableRequests.drainPermits();
-                int occupiedSlots = BUFFER_SIZE - emptyRequestSlots.availablePermits();
-                if(occupiedSlots > 0) {
-                    emptyRequestSlots.release(occupiedSlots);
-                } else {
-                    emptyRequestSlots.acquire(-1 * occupiedSlots);
-                }
+                resetPool();
             }
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             // TODO: Log error to file
         }
+    }
+
+    public void resetPool() {
+        try {
+            availableRequests.drainPermits();
+            int occupiedSlots = BUFFER_SIZE - emptyRequestSlots.availablePermits();
+            if(occupiedSlots > 0) {
+                emptyRequestSlots.release(occupiedSlots);
+            } else {
+                emptyRequestSlots.acquire(-1 * occupiedSlots);
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+            // TODO: Log error to file
+        }
+    }
+
+    public void printStats() {
+        System.out.println("Empty - " + emptyRequestSlots.availablePermits() + ", Available - " + availableRequests.availablePermits());
     }
 }

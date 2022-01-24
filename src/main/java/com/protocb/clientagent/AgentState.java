@@ -30,7 +30,7 @@ public class AgentState implements Subject {
 
     @PostConstruct
     private void postContruct() {
-        this.alive = false;
+        this.alive = true;//false;
         this.networkPartitioned = false;
         this.experimentSession = "Uninitialized";
         this.partitionMembers = new ArrayList<>();

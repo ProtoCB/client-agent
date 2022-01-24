@@ -2,12 +2,14 @@ package com.protocb.clientagent;
 
 import com.protocb.clientagent.interaction.Observer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class Proxy implements Observer {
 
     @Autowired
@@ -41,7 +43,7 @@ public class Proxy implements Observer {
     }
 
     public void sendRequestToServer() {
-        System.out.println("REQUEST");
+        System.out.println("REQUEST - " + serverUrl + ", " + tfProbability);
     }
 
 }

@@ -1,5 +1,6 @@
 package com.protocb.clientagent;
 
+import com.protocb.clientagent.driver.DriverCoordinator;
 import com.protocb.clientagent.interaction.Observer;
 import com.protocb.clientagent.interaction.Subject;
 import com.protocb.clientagent.requestgenerator.RequestGenerationAgent;
@@ -15,13 +16,19 @@ public class ClientAgentApplication {
     @Autowired
     private RequestGenerationAgent r;
 
+    @Autowired
+    private DriverCoordinator dc;
+
 	public static void main(String[] args) {
 		SpringApplication.run(ClientAgentApplication.class, args);
 	}
 
     @EventListener
-    public void handleContextRefresh(ContextRefreshedEvent event) {
-        r.generateRequestsAtDelay(300);
+    public void handleContextRefresh(ContextRefreshedEvent event) throws Exception {
+	    dc.enableDriver();
+        r.generateRequestsAtDelay(500);
+        Thread.sleep(5000);
+        dc.disableDriver();
     }
 
 }

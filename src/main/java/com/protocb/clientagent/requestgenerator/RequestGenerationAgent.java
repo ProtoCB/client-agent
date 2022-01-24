@@ -18,20 +18,18 @@ public class RequestGenerationAgent {
 
     private ScheduledFuture generatorTask;
 
-    public boolean isGeneratorActive() {
-        if(generatorTask != null && !generatorTask.isCancelled()) {
-            return true;
-        } else {
-            return false;
-        }
+    public void generateRequestsAtDelay(int delayInMilliseconds) {
+        disableRequestGeneration();
+        generatorTask = scheduledExecutorService.scheduleWithFixedDelay(requestGenerator, 0, delayInMilliseconds, TimeUnit.MILLISECONDS);
     }
 
-    public void generateRequestsAtDelay(int delayInMilliseconds) {
+    public void disableRequestGeneration() {
         if(isGeneratorActive()) {
             generatorTask.cancel(false);
         }
-
-        generatorTask = scheduledExecutorService.scheduleAtFixedRate(requestGenerator, 0, delayInMilliseconds, TimeUnit.MILLISECONDS);
     }
 
+    private boolean isGeneratorActive() {
+        return generatorTask != null && !generatorTask.isCancelled();
+    }
 }
