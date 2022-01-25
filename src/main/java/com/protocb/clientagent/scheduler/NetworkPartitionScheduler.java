@@ -2,6 +2,7 @@ package com.protocb.clientagent.scheduler;
 
 import com.protocb.clientagent.AgentState;
 import com.protocb.clientagent.dto.NetworkPartitionEvent;
+import com.protocb.clientagent.logger.Logger;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,9 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 public class NetworkPartitionScheduler {
+
+    @Autowired
+    private Logger logger;
 
     @Autowired
     private AgentState agentState;
@@ -35,6 +39,7 @@ public class NetworkPartitionScheduler {
         public void run() {
             NetworkPartitionEvent networkPartitionEvent = getNextPartition();
             agentState.setNetworkPartition(networkPartitionEvent.isNetworkPartitioned(), networkPartitionEvent.getPartition());
+            logger.logSchedulingEvent("Network partition changed to - " + networkPartitionEvent.isNetworkPartitioned());
         }
     }
 
@@ -60,7 +65,7 @@ public class NetworkPartitionScheduler {
 
             if(delay <= 0) {
                 System.out.println("Not scheduling past event np");
-                //TODO: Log error to file
+                logger.logErrorEvent("Network Partition event cannot be in past");
                 continue;
             }
 
@@ -75,7 +80,7 @@ public class NetworkPartitionScheduler {
 
         if(nextEventIndex < 0) {
             System.out.println("Something wrong with schedule");
-            //TODO: Log error to file
+            logger.logErrorEvent("NetworkPartitionScheduler - Trying to work on an empty schedule");
             return NetworkPartitionEvent.builder().networkPartitioned(false).partition(new ArrayList<String>()).build();
         }
 

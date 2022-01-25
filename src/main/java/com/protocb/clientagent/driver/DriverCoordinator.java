@@ -2,6 +2,8 @@ package com.protocb.clientagent.driver;
 
 import com.protocb.clientagent.AgentState;
 import com.protocb.clientagent.interaction.Observer;
+import com.protocb.clientagent.logger.Logger;
+import com.protocb.clientagent.requestpool.RequestPool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +17,9 @@ import java.util.concurrent.TimeUnit;
 public class DriverCoordinator implements Observer {
 
     @Autowired
+    private Logger logger;
+
+    @Autowired
     private ScheduledExecutorService scheduledExecutorService;
 
     @Autowired
@@ -22,6 +27,9 @@ public class DriverCoordinator implements Observer {
 
     @Autowired
     private Driver driver;
+
+    @Autowired
+    private RequestPool requestPool;
 
     private ScheduledFuture driverTask;
 
@@ -37,6 +45,7 @@ public class DriverCoordinator implements Observer {
 
     public void enableDriver() {
         System.out.println("Enabling driver");
+        logger.logSchedulingEvent("Enabling Driver");
         disableDriver();
         driverTask = scheduledExecutorService.schedule(driver, 0, TimeUnit.MILLISECONDS);
     }
@@ -44,7 +53,9 @@ public class DriverCoordinator implements Observer {
     public void disableDriver() {
         if(isDriverActive()) {
             System.out.println("Disabling driver");
+            logger.logSchedulingEvent("Disabling driver");
             driverTask.cancel(true);
+            requestPool.resetPool();
         }
     }
 
@@ -54,10 +65,10 @@ public class DriverCoordinator implements Observer {
 
     @Override
     public void update() {
-        boolean experimentUnderProgress = agentState.isExperimentUnderProgress();
-        if(isDriverActive() && !experimentUnderProgress) {
+        boolean agentAlive = agentState.isAlive();
+        if(isDriverActive() && !agentAlive) {
             disableDriver();
-        } else if(!isDriverActive() && experimentUnderProgress) {
+        } else if(!isDriverActive() && agentAlive) {
             enableDriver();
         }
     }

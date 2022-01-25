@@ -9,5 +9,6 @@ public class ExperimentSchedule {
 
     private long start;
     private long end;
+    private String experimentSession;
 
 }

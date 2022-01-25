@@ -2,6 +2,7 @@ package com.protocb.clientagent.scheduler;
 
 import com.protocb.clientagent.AgentState;
 import com.protocb.clientagent.dto.RequestRateChangeEvent;
+import com.protocb.clientagent.logger.Logger;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,9 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 public class RequestRateScheduler {
+
+    @Autowired
+    private Logger logger;
 
     @Autowired
     private AgentState agentState;
@@ -35,6 +39,7 @@ public class RequestRateScheduler {
         public void run() {
             float newRate = getNextRate();
             agentState.setRequestsPerSecond(newRate);
+            logger.logSchedulingEvent("Request rate set to - " + newRate + " per sec");
         }
     }
 
@@ -60,7 +65,7 @@ public class RequestRateScheduler {
 
             if(delay <= 0) {
                 System.out.println("Not scheduling past event reqrate");
-                //TODO: Log error to file
+                logger.logErrorEvent("Request Rate Change event cannot be in past");
                 continue;
             }
 
@@ -75,7 +80,7 @@ public class RequestRateScheduler {
 
         if(nextEventIndex < 0) {
             System.out.println("Something wrong with schedule");
-            //TODO: Log error to file
+            logger.logErrorEvent("RequestRateScheduler - Trying to work on an empty schedule");
             return 0;
         }
 

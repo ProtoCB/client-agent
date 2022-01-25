@@ -2,6 +2,7 @@ package com.protocb.clientagent.requestgenerator;
 
 import com.protocb.clientagent.AgentState;
 import com.protocb.clientagent.interaction.Observer;
+import com.protocb.clientagent.logger.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +14,9 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 public class RequestGenerationAgent implements Observer {
+
+    @Autowired
+    private Logger logger;
 
     @Autowired
     private ScheduledExecutorService scheduledExecutorService;
@@ -40,11 +44,13 @@ public class RequestGenerationAgent implements Observer {
     public void generateRequestsAtDelay(int delayInMilliseconds) {
         disableRequestGeneration();
         System.out.println("Starting request generation @ " + delayInMilliseconds + " milSec");
+        logger.logSchedulingEvent("Starting request generation at " + requestsPerSecond + " per sec");
         generatorTask = scheduledExecutorService.scheduleWithFixedDelay(requestGenerator, 0, delayInMilliseconds, TimeUnit.MILLISECONDS);
     }
 
     public void disableRequestGeneration() {
         if(isGeneratorActive()) {
+            logger.logSchedulingEvent("Disabling running request generator");
             generatorTask.cancel(false);
         }
     }

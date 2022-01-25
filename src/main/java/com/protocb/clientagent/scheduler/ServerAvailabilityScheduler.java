@@ -3,6 +3,7 @@ package com.protocb.clientagent.scheduler;
 import com.protocb.clientagent.AgentState;
 import com.protocb.clientagent.config.ActivityState;
 import com.protocb.clientagent.dto.ActivityChangeEvent;
+import com.protocb.clientagent.logger.Logger;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,9 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 public class ServerAvailabilityScheduler {
+
+    @Autowired
+    private Logger logger;
 
     @Autowired
     private AgentState agentState;
@@ -36,8 +40,10 @@ public class ServerAvailabilityScheduler {
         public void run() {
             ActivityState activityState = getNextState();
             if(activityState == ActivityState.ACTIVE) {
+                logger.logSchedulingEvent("Server availability set to true");
                 agentState.setServerAvailable(true);
             } else {
+                logger.logSchedulingEvent("Server availability set to false");
                 agentState.setServerAvailable(false);
             }
         }
@@ -65,7 +71,7 @@ public class ServerAvailabilityScheduler {
 
             if(delay <= 0) {
                 System.out.println("Not scheduling past event sa");
-                //TODO: Log error to file
+                logger.logErrorEvent("Server Availability Change event cannot be in past");
                 continue;
             }
 
@@ -80,7 +86,7 @@ public class ServerAvailabilityScheduler {
 
         if(nextEventIndex < 0) {
             System.out.println("Something wrong with schedule");
-            //TODO: Log error to file
+            logger.logErrorEvent("ServerAvailabilityScheduler - Trying to work on an empty schedule");
             return ActivityState.INACTIVE;
         }
 

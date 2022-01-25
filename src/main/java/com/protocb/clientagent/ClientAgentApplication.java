@@ -6,6 +6,7 @@ import com.protocb.clientagent.dto.ActivityChangeEvent;
 import com.protocb.clientagent.dto.ExperimentSchedule;
 import com.protocb.clientagent.dto.NetworkPartitionEvent;
 import com.protocb.clientagent.dto.RequestRateChangeEvent;
+import com.protocb.clientagent.logger.Logger;
 import com.protocb.clientagent.requestgenerator.RequestGenerationAgent;
 import com.protocb.clientagent.scheduler.ExperimentScheduler;
 import com.protocb.clientagent.scheduler.LifeScheduler;
@@ -35,6 +36,9 @@ public class ClientAgentApplication {
 
     @Autowired
     private ExperimentScheduler e;
+
+    @Autowired
+    private Logger logger;
 
 	public static void main(String[] args) {
 		SpringApplication.run(ClientAgentApplication.class, args);
@@ -68,7 +72,7 @@ public class ClientAgentApplication {
         a.add(a1);
         a.add(a2);
 
-        ExperimentSchedule es = ExperimentSchedule.builder().start(start + 1).end(start + 12).build();
+        ExperimentSchedule es = ExperimentSchedule.builder().start(start + 1).end(start + 12).experimentSession("test-ca").build();
 
         n.scheduleExperiment(l);
         rs.scheduleExperiment(r);

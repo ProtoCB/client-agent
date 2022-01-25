@@ -2,6 +2,7 @@ package com.protocb.clientagent.requestpool;
 
 import com.protocb.clientagent.AgentState;
 import com.protocb.clientagent.interaction.Observer;
+import com.protocb.clientagent.logger.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +14,9 @@ import static com.protocb.clientagent.config.GlobalVariables.BUFFER_SIZE;
 
 @Component
 public class RequestPool implements Observer {
+
+    @Autowired
+    private Logger logger;
 
     @Autowired
     private AgentState agentState;
@@ -41,11 +45,11 @@ public class RequestPool implements Observer {
 
             availableRequests.acquire();
             emptyRequestSlots.release();
+            logger.log("FETCH", "Fetched Request. " + availableRequests.availablePermits() + " requests left");
 
         } catch (Exception e) {
-//            e.printStackTrace();
             System.out.println("Fetch request failed");
-            // TODO: Log error to file
+            logger.logErrorEvent("Fetching request failed - " + e.getMessage());
         }
     }
 
@@ -60,13 +64,13 @@ public class RequestPool implements Observer {
                 emptyRequestSlots.acquire();
                 availableRequests.release();
                 System.out.println("Added Request");
+                logger.log("REQ", "Added Request. " + availableRequests.availablePermits() + " requests available");
             } else {
                 resetPool();
             }
         } catch (Exception e) {
-//            e.printStackTrace();
             System.out.printf("Adding request failed");
-            // TODO: Log error to file
+            logger.logErrorEvent("Adding request failed - " + e.getMessage());
         }
     }
 
@@ -80,12 +84,8 @@ public class RequestPool implements Observer {
                 emptyRequestSlots.acquire(-1 * occupiedSlots);
             }
         } catch(Exception e) {
-            e.printStackTrace();
-            // TODO: Log error to file
-        }
-    }
+            logger.logErrorEvent("Resetting request pool failed - " + e.getMessage());
 
-    public void printStats() {
-        System.out.println("Empty - " + emptyRequestSlots.availablePermits() + ", Available - " + availableRequests.availablePermits());
+        }
     }
 }

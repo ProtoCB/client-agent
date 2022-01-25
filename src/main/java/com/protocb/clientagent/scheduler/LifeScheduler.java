@@ -3,6 +3,7 @@ package com.protocb.clientagent.scheduler;
 import com.protocb.clientagent.AgentState;
 import com.protocb.clientagent.config.ActivityState;
 import com.protocb.clientagent.dto.ActivityChangeEvent;
+import com.protocb.clientagent.logger.Logger;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,9 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 public class LifeScheduler {
+
+    @Autowired
+    private Logger logger;
 
     @Autowired
     private AgentState agentState;
@@ -36,8 +40,10 @@ public class LifeScheduler {
         public void run() {
             ActivityState activityState = getNextState();
             if(activityState == ActivityState.ACTIVE) {
+                logger.logSchedulingEvent("Agent set as alive");
                 agentState.setAlive(true);
             } else {
+                logger.logSchedulingEvent("Agent set as dead");
                 agentState.setAlive(false);
             }
         }
@@ -66,7 +72,7 @@ public class LifeScheduler {
 
             if(delay <= 0) {
                 System.out.println("Not scheduling past event life");
-                //TODO: Log error to file
+                logger.logErrorEvent("Life event cannot be in past");
                 continue;
             }
 
@@ -81,7 +87,7 @@ public class LifeScheduler {
 
         if(nextEventIndex < 0) {
             System.out.println("Something wrong with schedule");
-            //TODO: Log error to file
+            logger.logErrorEvent("LifeScheduler - Trying to work on an empty schedule");
             return ActivityState.INACTIVE;
         }
 
