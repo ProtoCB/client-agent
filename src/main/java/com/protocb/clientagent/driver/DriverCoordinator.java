@@ -3,7 +3,6 @@ package com.protocb.clientagent.driver;
 import com.protocb.clientagent.AgentState;
 import com.protocb.clientagent.interaction.Observer;
 import com.protocb.clientagent.logger.Logger;
-import com.protocb.clientagent.requestpool.RequestPool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,9 +27,6 @@ public class DriverCoordinator implements Observer {
     @Autowired
     private Driver driver;
 
-    @Autowired
-    private RequestPool requestPool;
-
     private ScheduledFuture driverTask;
 
     @PostConstruct
@@ -52,10 +48,9 @@ public class DriverCoordinator implements Observer {
 
     public void disableDriver() {
         if(isDriverActive()) {
-            System.out.println("Disabling driver");
-            logger.logSchedulingEvent("Disabling driver");
+            System.out.println("Disabling running driver");
+            logger.logSchedulingEvent("Disabling running driver");
             driverTask.cancel(true);
-            requestPool.resetPool();
         }
     }
 

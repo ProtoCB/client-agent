@@ -13,13 +13,10 @@ import java.util.concurrent.Semaphore;
 import static com.protocb.clientagent.config.GlobalVariables.BUFFER_SIZE;
 
 @Component
-public class RequestPool implements Observer {
+public class RequestPool {
 
     @Autowired
     private Logger logger;
-
-    @Autowired
-    private AgentState agentState;
 
     private boolean enabled;
 
@@ -32,12 +29,6 @@ public class RequestPool implements Observer {
         this.enabled = false;
         this.availableRequests = new Semaphore(0, true);
         this.emptyRequestSlots = new Semaphore(BUFFER_SIZE, true);
-        agentState.registerObserver(this);
-    }
-
-    @PreDestroy
-    private void preDestroy() {
-        agentState.removeObserver(this);
     }
 
     public void fetchRequestOrWait(){
@@ -53,21 +44,14 @@ public class RequestPool implements Observer {
         }
     }
 
-    @Override
-    public void update() {
-        this.enabled = agentState.isAlive();
-    }
-
     public void addRequestToPool() {
         try {
-            if(enabled) {
-                emptyRequestSlots.acquire();
-                availableRequests.release();
-                System.out.println("Added Request");
-                logger.log("REQ", "Added Request. " + availableRequests.availablePermits() + " requests available");
-            } else {
-                resetPool();
-            }
+
+            emptyRequestSlots.acquire();
+            availableRequests.release();
+            System.out.println("Added Request");
+            logger.log("REQ", "Added Request. " + availableRequests.availablePermits() + " requests available");
+
         } catch (Exception e) {
             System.out.printf("Adding request failed");
             logger.logErrorEvent("Adding request failed - " + e.getMessage());
@@ -83,9 +67,9 @@ public class RequestPool implements Observer {
             } else {
                 emptyRequestSlots.acquire(-1 * occupiedSlots);
             }
+            logger.logSchedulingEvent("Request pool reset");
         } catch(Exception e) {
             logger.logErrorEvent("Resetting request pool failed - " + e.getMessage());
-
         }
     }
 }

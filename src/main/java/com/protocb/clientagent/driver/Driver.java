@@ -21,6 +21,7 @@ public class Driver implements Runnable {
     @Override
     public void run() {
         try {
+            requestPool.resetPool();
             while(true) {
                 requestPool.fetchRequestOrWait();
                 proxy.sendRequestToServer();

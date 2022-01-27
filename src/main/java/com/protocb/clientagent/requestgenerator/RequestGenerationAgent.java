@@ -41,14 +41,13 @@ public class RequestGenerationAgent implements Observer {
         agentState.removeObserver(this);
     }
 
-    public void generateRequestsAtDelay(int delayInMilliseconds) {
-        disableRequestGeneration();
+    private void generateRequestsAtDelay(int delayInMilliseconds) {
         System.out.println("Starting request generation @ " + delayInMilliseconds + " milSec");
         logger.logSchedulingEvent("Starting request generation at " + requestsPerSecond + " per sec");
         generatorTask = scheduledExecutorService.scheduleWithFixedDelay(requestGenerator, 0, delayInMilliseconds, TimeUnit.MILLISECONDS);
     }
 
-    public void disableRequestGeneration() {
+    private void disableRequestGeneration() {
         if(isGeneratorActive()) {
             logger.logSchedulingEvent("Disabling running request generator");
             generatorTask.cancel(false);
@@ -62,15 +61,15 @@ public class RequestGenerationAgent implements Observer {
     @Override
     public void update() {
         float newRate = agentState.getRequestsPerSecond();
-        if(requestsPerSecond == newRate) {
-            return;
-        } else if(newRate == 0) {
+        boolean alive = agentState.isAlive();
+
+        if(!alive || newRate == 0) {
             disableRequestGeneration();
             requestsPerSecond = 0;
-            return;
-        } else {
+        } else if(newRate != requestsPerSecond){
             requestsPerSecond = newRate;
             int delay = Math.round(1000/newRate);
+            disableRequestGeneration();
             generateRequestsAtDelay(delay);
         }
 
