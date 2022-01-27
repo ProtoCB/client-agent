@@ -8,10 +8,7 @@ import com.protocb.clientagent.dto.NetworkPartitionEvent;
 import com.protocb.clientagent.dto.RequestRateChangeEvent;
 import com.protocb.clientagent.logger.Logger;
 import com.protocb.clientagent.requestgenerator.RequestGenerationAgent;
-import com.protocb.clientagent.scheduler.ExperimentScheduler;
-import com.protocb.clientagent.scheduler.LifeScheduler;
-import com.protocb.clientagent.scheduler.NetworkPartitionScheduler;
-import com.protocb.clientagent.scheduler.RequestRateScheduler;
+import com.protocb.clientagent.scheduler.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -36,6 +33,9 @@ public class ClientAgentApplication {
 
     @Autowired
     private ExperimentScheduler e;
+
+    @Autowired
+    private ServerAvailabilityScheduler s;
 
     @Autowired
     private Logger logger;
@@ -74,9 +74,12 @@ public class ClientAgentApplication {
 
         ExperimentSchedule es = ExperimentSchedule.builder().start(start + 1).end(start + 12).experimentSession("test-ca").build();
 
+
+
         n.scheduleExperiment(l);
         rs.scheduleExperiment(r);
         lifeScheduler.scheduleExperiment(a);
+        s.scheduleExperiment(a);
         e.scheduleExperiment(es);
 
     }

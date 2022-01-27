@@ -1,16 +1,13 @@
 package com.protocb.clientagent.requestpool;
 
-import com.protocb.clientagent.AgentState;
-import com.protocb.clientagent.interaction.Observer;
 import com.protocb.clientagent.logger.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.util.concurrent.Semaphore;
 
-import static com.protocb.clientagent.config.GlobalVariables.BUFFER_SIZE;
+import static com.protocb.clientagent.config.EnvironmentVariables.BUFFER_SIZE;
 
 @Component
 public class RequestPool {

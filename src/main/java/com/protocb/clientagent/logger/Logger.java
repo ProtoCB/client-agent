@@ -5,22 +5,17 @@ import com.google.cloud.storage.Bucket;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.cloud.StorageClient;
-import com.protocb.clientagent.AgentState;
-import com.protocb.clientagent.interaction.Observer;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.FileSystemUtils;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Instant;
 
-import static com.protocb.clientagent.config.GlobalVariables.*;
+import static com.protocb.clientagent.config.EnvironmentVariables.*;
 
 @Component
 public class Logger {

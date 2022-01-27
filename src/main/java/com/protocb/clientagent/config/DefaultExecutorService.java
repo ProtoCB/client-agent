@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static com.protocb.clientagent.config.GlobalVariables.SCHEDULER_POOL_SIZE;
+import static com.protocb.clientagent.config.EnvironmentVariables.SCHEDULER_POOL_SIZE;
 
 @Component
 public class DefaultExecutorService {

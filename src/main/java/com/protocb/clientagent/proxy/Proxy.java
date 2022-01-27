@@ -1,5 +1,6 @@
-package com.protocb.clientagent;
+package com.protocb.clientagent.proxy;
 
+import com.protocb.clientagent.AgentState;
 import com.protocb.clientagent.interaction.Observer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -49,8 +50,9 @@ public class Proxy implements Observer {
         this.tfProbability = agentState.getTfProbability();
     }
 
-    public void sendRequestToServer() {
+    public ResponseType sendRequestToServer() {
         System.out.println("REQUEST - " + serverUrl + ", " + tfProbability);
+        return ResponseType.SUCCESS;
     }
 
 }
