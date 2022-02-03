@@ -44,7 +44,6 @@ public class Driver implements Runnable {
                 }
 
                 ResponseType responseType = proxy.sendRequestToServer();
-                Thread.sleep(1000);
 
                 if(responseType == ResponseType.SUCCESS) {
                     logger.log("S", "Successful Request");

@@ -43,6 +43,10 @@ public class AgentState implements Subject {
 
     private Map<String, Integer> circuitBreakerParameters;
 
+    private int minLatency;
+
+    private int failureInferenceTime;
+
     @PostConstruct
     private void postContruct() {
         resetAgent();
@@ -78,6 +82,8 @@ public class AgentState implements Subject {
         this.experimentStatus = "Uninitialized";
         this.circuitBreakerType = "Closed";
         this.circuitBreakerParameters = new HashMap<>();
+        this.minLatency = 0;
+        this.failureInferenceTime = 0;
     }
 
     public void setAlive(boolean alive) {
@@ -137,5 +143,15 @@ public class AgentState implements Subject {
 
     public void setCircuitBreakerParameters(Map<String, Integer> circuitBreakerParameters) {
         this.circuitBreakerParameters = circuitBreakerParameters;
+    }
+
+    public void setMinLatency(int minLatency) {
+        this.minLatency = minLatency;
+        this.notifyObservers();
+    }
+
+    public void setFailureInferenceTime(int failureInferenceTime) {
+        this.failureInferenceTime = failureInferenceTime;
+        this.notifyObservers();
     }
 }
