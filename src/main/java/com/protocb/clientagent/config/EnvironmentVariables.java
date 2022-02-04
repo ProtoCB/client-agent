@@ -13,4 +13,5 @@ public class EnvironmentVariables {
     public static final String AGENT_SECRET = "agent-secret";
     public static final int HEARTBEAT_DELAY = 3000;
     public static final int HEARTBEAT_TIMEOUT = 1500;
+    public static final String NORTHBOUND_ENDPOINT = "/api/v1/northbound";
 }

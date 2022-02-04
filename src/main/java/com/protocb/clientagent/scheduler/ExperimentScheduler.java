@@ -44,8 +44,9 @@ public class ExperimentScheduler {
                 logger.logSchedulingEvent("Experiment started");
                 agentState.setExperimentUnderProgress(true);
             } else {
-                logger.logSchedulingEvent("Experiment ended");
+                agentState.setAlive(false);
                 agentState.setExperimentUnderProgress(false);
+                logger.logSchedulingEvent("Experiment ended");
             }
         }
     }
@@ -64,9 +65,13 @@ public class ExperimentScheduler {
         }
         schedule.clear();
         activityStates.clear();
+        logger.setExperimentSession("Uninitialized");
     }
 
     public void scheduleExperiment(ExperimentSchedule schedule) {
+
+        logger.setExperimentSession(agentState.getExperimentSession());
+        System.out.println("Experiment log file created");
 
         long delay = schedule.getStart() - Instant.now().getEpochSecond();
 
@@ -77,16 +82,6 @@ public class ExperimentScheduler {
             activityStates.add(ActivityState.ACTIVE);
             scheduledExecutorService.schedule(new ExperimentSchedulingTask(), delay, TimeUnit.SECONDS);
         }
-
-        scheduledExecutorService.schedule(new Runnable() {
-            @Override
-            public void run() {
-                agentState.setExperimentSession(schedule.getExperimentSession());
-                logger.setExperimentSession(schedule.getExperimentSession());
-                logger.createExperimentSessionLog();
-                System.out.println("Experiment log file created");
-            }
-        }, delay - 2, TimeUnit.SECONDS);
 
         delay = schedule.getEnd() - Instant.now().getEpochSecond();
 
@@ -103,13 +98,14 @@ public class ExperimentScheduler {
             public void run() {
                 logger.shipExperimentSessionLog();
                 System.out.println("Experiment logs shipped");
+                agentState.setExperimentStatus("Logs Shipped");
             }
         }, delay + 2, TimeUnit.SECONDS);
 
         nextEventIndex = 0;
     }
 
-    public ActivityState getNextState() {
+    private ActivityState getNextState() {
 
         if(nextEventIndex < 0) {
             System.out.println("Something wrong with schedule");

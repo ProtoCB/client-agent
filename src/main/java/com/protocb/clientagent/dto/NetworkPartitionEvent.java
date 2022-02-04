@@ -2,6 +2,7 @@ package com.protocb.clientagent.dto;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.NonNull;
 
 import java.util.List;
 
@@ -9,10 +10,13 @@ import java.util.List;
 @Builder
 public class NetworkPartitionEvent {
 
+    @NonNull
     private boolean networkPartitioned;
 
+    @NonNull
     private List<String> partition;
 
-    private long time;
+    @NonNull
+    private Long time;
 
 }

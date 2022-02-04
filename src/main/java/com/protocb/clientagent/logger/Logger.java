@@ -50,7 +50,7 @@ public class Logger {
 
     }
 
-    public void createExperimentSessionLog() {
+    private void createExperimentSessionLog() {
         try {
             FileUtils.cleanDirectory(new File(LOG_DIRECTORY));
             sessionLog = new File(LOG_DIRECTORY + "/" + AGENT_URL + ".csv");
@@ -88,5 +88,6 @@ public class Logger {
 
     public void setExperimentSession(String experimentSession) {
         this.experimentSession = experimentSession;
+        createExperimentSessionLog();
     }
 }

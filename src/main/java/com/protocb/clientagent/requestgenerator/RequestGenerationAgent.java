@@ -49,8 +49,9 @@ public class RequestGenerationAgent implements Observer {
 
     private void disableRequestGeneration() {
         if(isGeneratorActive()) {
+            System.out.println("Disabling req generator");
             logger.logSchedulingEvent("Disabling running request generator");
-            generatorTask.cancel(false);
+            generatorTask.cancel(true);
         }
     }
 

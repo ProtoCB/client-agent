@@ -47,7 +47,7 @@ public class ClientAgentApplication {
     @EventListener
     public void handleContextRefresh(ContextRefreshedEvent event) throws Exception {
 
-        long start = Instant.now().getEpochSecond() + 15;
+    /*    long start = Instant.now().getEpochSecond() + 15;
 
         NetworkPartitionEvent networkPartitionEvent1 = NetworkPartitionEvent.builder().time(start + 5).networkPartitioned(true).build();
         NetworkPartitionEvent networkPartitionEvent2 = NetworkPartitionEvent.builder().time(start + 10).networkPartitioned(false).build();
@@ -72,7 +72,7 @@ public class ClientAgentApplication {
         a.add(a1);
         a.add(a2);
 
-        ExperimentSchedule es = ExperimentSchedule.builder().start(start - 6).end(start + 12).experimentSession("test-ca").build();
+        ExperimentSchedule es = ExperimentSchedule.builder().start(start - 6).end(start + 12).build();
 
 
 
@@ -80,7 +80,7 @@ public class ClientAgentApplication {
         rs.scheduleExperiment(r);
         lifeScheduler.scheduleExperiment(a);
         s.scheduleExperiment(a);
-        e.scheduleExperiment(es);
+        e.scheduleExperiment(es); */
 
     }
 

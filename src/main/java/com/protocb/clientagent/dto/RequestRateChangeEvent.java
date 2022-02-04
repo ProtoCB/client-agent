@@ -2,13 +2,16 @@ package com.protocb.clientagent.dto;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.NonNull;
 
 @Data
 @Builder
 public class RequestRateChangeEvent {
 
-    private float rate;
+    @NonNull
+    private Float rate;
 
-    private long time;
+    @NonNull
+    private Long time;
 
 }

@@ -15,15 +15,12 @@ public class RequestPool {
     @Autowired
     private Logger logger;
 
-    private boolean enabled;
-
     private Semaphore availableRequests;
 
     private Semaphore emptyRequestSlots;
 
     @PostConstruct
     private void postContruct() {
-        this.enabled = false;
         this.availableRequests = new Semaphore(0, true);
         this.emptyRequestSlots = new Semaphore(BUFFER_SIZE, true);
     }

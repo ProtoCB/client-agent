@@ -47,10 +47,10 @@ public class HeartbeatDriver {
                     .bodyToMono(String.class)
                     .timeout(Duration.ofMillis(HEARTBEAT_TIMEOUT))
                     .block();
-            System.out.println("Heartbeat");
+//            System.out.println("Heartbeat");
         } catch (Exception e) {
-            System.out.println(e.getMessage());
-            System.out.println("Heartbeat Error!");
+//            System.out.println(e.getMessage());
+//            System.out.println("Heartbeat Error!");
         }
     }
 

@@ -1,5 +1,7 @@
 package com.protocb.clientagent.circuitbreaker;
 
+import lombok.ToString;
+
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
@@ -75,6 +77,7 @@ public class StaticCircuitBreaker implements CircuitBreaker {
 
     @Override
     public boolean isCircuitBreakerOpen() {
+        System.out.println(circuitBreakerState + " | " + window.toString());
         if(circuitBreakerState == OPEN) {
             long timeElapsedSinceOpen = Instant.now().toEpochMilli() % 100000 - lastOpenAt;
             if(timeElapsedSinceOpen >= openDuration) {

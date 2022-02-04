@@ -83,7 +83,7 @@ public class LifeScheduler {
         nextEventIndex = activityStates.size() != 0 ? 0 : -1;
     }
 
-    public ActivityState getNextState() {
+    private ActivityState getNextState() {
 
         if(nextEventIndex < 0) {
             System.out.println("Something wrong with schedule");

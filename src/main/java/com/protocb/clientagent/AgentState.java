@@ -49,7 +49,20 @@ public class AgentState implements Subject {
 
     @PostConstruct
     private void postContruct() {
-        resetAgent();
+        this.observers = new ArrayList<>();
+        this.alive = false;
+        this.networkPartitioned = false;
+        this.experimentSession = "Uninitialized";
+        this.partitionMembers = new ArrayList<>();
+        this.serverUrl = "Uninitialized";
+        this.tfProbability = 0;
+        this.requestsPerSecond = 0;
+        this.experimentUnderProgress = false;
+        this.experimentStatus = "Uninitialized";
+        this.circuitBreakerType = "Closed";
+        this.circuitBreakerParameters = new HashMap<>();
+        this.minLatency = 0;
+        this.failureInferenceTime = 0;
     }
 
     @Override
@@ -76,7 +89,6 @@ public class AgentState implements Subject {
         this.partitionMembers = new ArrayList<>();
         this.serverUrl = "Uninitialized";
         this.tfProbability = 0;
-        this.observers = new ArrayList<>();
         this.requestsPerSecond = 0;
         this.experimentUnderProgress = false;
         this.experimentStatus = "Uninitialized";
@@ -84,6 +96,7 @@ public class AgentState implements Subject {
         this.circuitBreakerParameters = new HashMap<>();
         this.minLatency = 0;
         this.failureInferenceTime = 0;
+        this.notifyObservers();
     }
 
     public void setAlive(boolean alive) {
@@ -153,5 +166,9 @@ public class AgentState implements Subject {
     public void setFailureInferenceTime(int failureInferenceTime) {
         this.failureInferenceTime = failureInferenceTime;
         this.notifyObservers();
+    }
+
+    public void setExperimentStatus(String experimentStatus) {
+        this.experimentStatus = experimentStatus;
     }
 }

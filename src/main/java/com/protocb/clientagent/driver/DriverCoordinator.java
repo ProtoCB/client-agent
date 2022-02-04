@@ -39,31 +39,20 @@ public class DriverCoordinator implements Observer {
         agentState.removeObserver(this);
     }
 
-    public void enableDriver() {
+    private void enableDriver() {
         System.out.println("Enabling driver");
         logger.logSchedulingEvent("Enabling Driver");
-        disableDriver();
         driverTask = scheduledExecutorService.schedule(driver, 0, TimeUnit.MILLISECONDS);
     }
 
-    public void disableDriver() {
-        if(isDriverActive()) {
-            System.out.println("Disabling running driver");
-            logger.logSchedulingEvent("Disabling running driver");
-            driverTask.cancel(true);
-        }
-    }
-
     private boolean isDriverActive() {
-        return driverTask != null && !driverTask.isCancelled();
+        return driverTask != null && !driverTask.isCancelled() && !driverTask.isDone();
     }
 
     @Override
     public void update() {
         boolean agentAlive = agentState.isAlive();
-        if(isDriverActive() && !agentAlive) {
-            disableDriver();
-        } else if(!isDriverActive() && agentAlive) {
+        if(!isDriverActive() && agentAlive) {
             enableDriver();
         }
     }
