@@ -1,6 +1,7 @@
 package com.protocb.clientagent.proxy;
 
 import com.protocb.clientagent.AgentState;
+import com.protocb.clientagent.circuitbreaker.gedcb.dto.GossipSetState;
 import com.protocb.clientagent.interaction.Observer;
 import com.protocb.clientagent.logger.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import javax.annotation.PreDestroy;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Component
@@ -86,7 +88,7 @@ public class Proxy implements Observer {
             if(serverAvailable && !shouldFailTransiently && serverReachable) {
                 return sendActualRequest();
             } else {
-                return failRequest();
+                return failRequest(failureInferenceTime);
             }
         } catch (Exception e) {
             logger.logErrorEvent("Proxy Error! - " + e.getMessage());
@@ -114,10 +116,46 @@ public class Proxy implements Observer {
         }
     }
 
-    private ResponseType failRequest() throws InterruptedException {
+    private ResponseType failRequest(int delay) throws InterruptedException {
         System.out.println("SINK");
-        Thread.sleep(failureInferenceTime);
+        Thread.sleep(delay);
         return ResponseType.FAILURE;
+    }
+
+    public GossipSetState sendGossipMessage(String clientUrl, GossipSetState gossipSetState) {
+        try {
+
+            boolean shouldFailTransiently = Math.random() < tfProbability;
+            boolean clientReachable = !networkPartitioned || allowList.contains(clientUrl);
+
+            if(!shouldFailTransiently && clientReachable) {
+                return WebClient.create(clientUrl)
+                        .post()
+                        .uri("/api/v1/gedcb/gossip")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(BodyInserters.fromValue(gossipSetState))
+                        .retrieve()
+                        .bodyToMono(GossipSetState.class)
+                        .timeout(Duration.ofMillis(failureInferenceTime))
+                        .block();
+
+            } else {
+                Thread.sleep(failureInferenceTime);
+                return GossipSetState.builder()
+                        .age(new HashMap<>())
+                        .opinion(new HashMap<>())
+                        .version(-1l)
+                        .build();
+            }
+
+        } catch(Exception e) {
+            logger.logErrorEvent("Exception while sending gossip message");
+            return GossipSetState.builder()
+                    .age(new HashMap<>())
+                    .opinion(new HashMap<>())
+                    .version(-1l)
+                    .build();
+        }
     }
 
 }

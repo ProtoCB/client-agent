@@ -4,5 +4,6 @@ public enum CircuitBreakerState {
     OPEN,
     CLOSED,
     HALF_OPEN,
-    SUSPICION
+    SUSPICION,
+    NOT_CLOSED
 }

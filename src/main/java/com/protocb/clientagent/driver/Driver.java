@@ -25,13 +25,16 @@ public class Driver implements Runnable {
     @Autowired
     private AgentState agentState;
 
+    @Autowired
+    private CircuitBreakerFactory circuitBreakerFactory;
+
     @Override
     public void run() {
         try {
 
             requestPool.resetPool();
 
-            CircuitBreaker circuitBreaker = CircuitBreakerFactory.getCircuitBreaker(agentState.getCircuitBreakerType());
+            CircuitBreaker circuitBreaker = circuitBreakerFactory.getCircuitBreaker(agentState.getCircuitBreakerType());
 
             circuitBreaker.initialize(agentState.getCircuitBreakerParameters());
 
@@ -57,6 +60,9 @@ public class Driver implements Runnable {
                 }
 
             }
+
+            circuitBreaker.reset();
+
         } catch (Exception e) {
             System.out.println("Driver Interrupted");
             e.printStackTrace();

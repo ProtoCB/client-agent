@@ -7,4 +7,5 @@ public interface CircuitBreaker {
     void registerFailure();
     boolean isCircuitBreakerOpen();
     void initialize(Map<String, Integer> parameters);
+    void reset();
 }

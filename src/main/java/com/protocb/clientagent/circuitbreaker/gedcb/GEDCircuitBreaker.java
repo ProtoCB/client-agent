@@ -1,6 +1,8 @@
-package com.protocb.clientagent.circuitbreaker;
+package com.protocb.clientagent.circuitbreaker.gedcb;
 
-import lombok.ToString;
+import com.protocb.clientagent.circuitbreaker.CircuitBreaker;
+import com.protocb.clientagent.circuitbreaker.CircuitBreakerState;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -10,15 +12,23 @@ import java.util.List;
 import java.util.Map;
 
 import static com.protocb.clientagent.circuitbreaker.CircuitBreakerState.*;
+import static com.protocb.clientagent.circuitbreaker.CircuitBreakerState.CLOSED;
 
 @Component
-public class StaticCircuitBreaker implements CircuitBreaker {
+public class GEDCircuitBreaker implements CircuitBreaker {
+
+    @Autowired
+    private GEDCBClientRegister gedcbClientRegister;
 
     private CircuitBreakerState circuitBreakerState;
 
     private List<Integer> window;
 
-    private int failureThreshold;
+    private int softFailureThreshold;
+
+    private int hardFailureThreshold;
+
+    private int suspicionSuccessThreshold;
 
     private int halfOpenFailureThreshold;
 
@@ -44,12 +54,22 @@ public class StaticCircuitBreaker implements CircuitBreaker {
             if(window.get(i) == 1) successes++;
         }
 
-        if(circuitBreakerState == CLOSED) {
-            if(failures > failureThreshold) {
+        if(circuitBreakerState == CLOSED && failures > softFailureThreshold) {
+            circuitBreakerState = SUSPICION;
+            gedcbClientRegister.updateSelfOpinion(NOT_CLOSED);
+            if(gedcbClientRegister.isConsensusOnSuspicion()) {
                 circuitBreakerState = OPEN;
                 clearWindow();
                 lastOpenAt = Instant.now().toEpochMilli() % 100000;
             }
+        } else if(circuitBreakerState == SUSPICION && (failures > hardFailureThreshold || gedcbClientRegister.isConsensusOnSuspicion())) {
+            circuitBreakerState = OPEN;
+            clearWindow();
+            lastOpenAt = Instant.now().toEpochMilli() % 100000;
+        } else if(circuitBreakerState == SUSPICION && successes > suspicionSuccessThreshold) {
+            circuitBreakerState = CLOSED;
+            clearWindow();
+            gedcbClientRegister.updateSelfOpinion(CLOSED);
         } else if(circuitBreakerState == HALF_OPEN) {
             if(failures > halfOpenFailureThreshold) {
                 circuitBreakerState = OPEN;
@@ -58,6 +78,7 @@ public class StaticCircuitBreaker implements CircuitBreaker {
             } else if(successes > halfOpenSuccessThreshold){
                 circuitBreakerState = CLOSED;
                 clearWindow();
+                gedcbClientRegister.updateSelfOpinion(CLOSED);
             }
         }
     }
@@ -88,6 +109,11 @@ public class StaticCircuitBreaker implements CircuitBreaker {
                 return false;
             }
             return true;
+        } else if(circuitBreakerState == SUSPICION && gedcbClientRegister.isConsensusOnSuspicion()) {
+            circuitBreakerState = OPEN;
+            clearWindow();
+            lastOpenAt = Instant.now().toEpochMilli() % 100000;
+            return true;
         } else {
             return false;
         }
@@ -95,7 +121,9 @@ public class StaticCircuitBreaker implements CircuitBreaker {
 
     @Override
     public void initialize(Map<String, Integer> parameters) {
-        failureThreshold = parameters.get("FT");
+        softFailureThreshold = parameters.get("SFT");
+        hardFailureThreshold = parameters.get("HFT");
+        suspicionSuccessThreshold = parameters.get("SST");
         halfOpenFailureThreshold = parameters.get("HOFT");
         halfOpenSuccessThreshold = parameters.get("HOST");
         openDuration = parameters.get("OD");
@@ -105,11 +133,21 @@ public class StaticCircuitBreaker implements CircuitBreaker {
         window = Arrays.asList(new Integer[windowSize]);
         clearWindow();
         circuitBreakerState = CLOSED;
+
+        int maxAge = parameters.get("maxAge");
+        int gossipPeriod = parameters.get("gossipPeriod");
+        int gossipCount = parameters.get("gossipCount");
+        boolean pushPullGossip = parameters.get("pushPullGossip") == 1;
+
+        gedcbClientRegister.initialize(maxAge, gossipPeriod, gossipCount, pushPullGossip);
+
     }
 
     @Override
     public void reset() {
-        failureThreshold = 0;
+        softFailureThreshold = 0;
+        hardFailureThreshold = 0;
+        suspicionSuccessThreshold = 0;
         halfOpenSuccessThreshold = 0;
         halfOpenFailureThreshold = 0;
         openDuration = 0;
@@ -117,5 +155,6 @@ public class StaticCircuitBreaker implements CircuitBreaker {
         index = 0;
         window = new ArrayList<>();
         circuitBreakerState = CLOSED;
+        gedcbClientRegister.reset();
     }
 }

@@ -1,11 +1,32 @@
 package com.protocb.clientagent.circuitbreaker;
 
+import com.protocb.clientagent.circuitbreaker.gedcb.GEDCircuitBreaker;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Component
 public class CircuitBreakerFactory {
-    public static CircuitBreaker getCircuitBreaker(String type) {
+
+    @Autowired
+    private StaticCircuitBreaker staticCircuitBreaker;
+
+    @Autowired
+    private GEDCircuitBreaker gedCircuitBreaker;
+
+    @Autowired
+    private ClosedCircuit closedCircuit;
+
+    public CircuitBreaker getCircuitBreaker(String type) {
         if(type.equals("Static")) {
-            return new StaticCircuitBreaker();
+            staticCircuitBreaker.reset();
+            return staticCircuitBreaker;
+        } else if(type.equals("GEDCB")) {
+            gedCircuitBreaker.reset();
+            return gedCircuitBreaker;
         } else {
-            return new ClosedCircuit();
+            return closedCircuit;
         }
     }
+
+
 }

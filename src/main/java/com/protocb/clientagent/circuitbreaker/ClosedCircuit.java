@@ -1,7 +1,10 @@
 package com.protocb.clientagent.circuitbreaker;
 
+import org.springframework.stereotype.Component;
+
 import java.util.Map;
 
+@Component
 public class ClosedCircuit implements CircuitBreaker {
     @Override
     public void registerSuccess() {
@@ -20,6 +23,11 @@ public class ClosedCircuit implements CircuitBreaker {
 
     @Override
     public void initialize(Map<String, Integer> parameters) {
+
+    }
+
+    @Override
+    public void reset() {
 
     }
 }
