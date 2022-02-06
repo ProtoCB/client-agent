@@ -12,8 +12,7 @@ import java.time.Duration;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static com.protocb.clientagent.config.EnvironmentVariables.HEARTBEAT_DELAY;
-import static com.protocb.clientagent.config.EnvironmentVariables.HEARTBEAT_TIMEOUT;
+import static com.protocb.clientagent.config.EnvironmentVariables.*;
 
 @Component
 public class HeartbeatDriver {
@@ -25,10 +24,9 @@ public class HeartbeatDriver {
     private HeartbeatPayload heartbeatPayload;
 
     @Autowired
-    private WebClient client;
-
-    @Autowired
     private ScheduledExecutorService scheduledExecutorService;
+
+    private WebClient client;
 
     private void sendHeartbeat() {
 
@@ -47,21 +45,17 @@ public class HeartbeatDriver {
                     .bodyToMono(String.class)
                     .timeout(Duration.ofMillis(HEARTBEAT_TIMEOUT))
                     .block();
-//            System.out.println("Heartbeat");
+
         } catch (Exception e) {
-//            System.out.println(e.getMessage());
-//            System.out.println("Heartbeat Error!");
+            System.out.println(e.getMessage());
+            System.out.println("Heartbeat Error!");
         }
     }
 
     @PostConstruct
     public void scheduleHeartbeats() {
-        scheduledExecutorService.scheduleWithFixedDelay(new Runnable() {
-            @Override
-            public void run() {
-                sendHeartbeat();
-            }
-        }, 2000, HEARTBEAT_DELAY, TimeUnit.MILLISECONDS);
+        client = WebClient.create("http://" + CONTROLLER_URL);
+        scheduledExecutorService.scheduleWithFixedDelay( () -> sendHeartbeat(), 2000, HEARTBEAT_DELAY, TimeUnit.MILLISECONDS);
     }
 
 }

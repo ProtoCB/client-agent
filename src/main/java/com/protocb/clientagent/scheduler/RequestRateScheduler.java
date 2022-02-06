@@ -39,7 +39,7 @@ public class RequestRateScheduler {
         public void run() {
             float newRate = getNextRate();
             agentState.setRequestsPerSecond(newRate);
-            logger.logSchedulingEvent("Request rate set to - " + newRate + " per sec");
+            logger.logSchedulingEvent("Request Rate - " + newRate + "/sec");
         }
     }
 
@@ -64,8 +64,6 @@ public class RequestRateScheduler {
             long delay = event.getTime() - Instant.now().getEpochSecond();
 
             if(delay <= 0) {
-                System.out.println("Not scheduling past event reqrate");
-                logger.logErrorEvent("Request Rate Change event cannot be in past");
                 continue;
             }
 
@@ -79,7 +77,6 @@ public class RequestRateScheduler {
     private float getNextRate() {
 
         if(nextEventIndex < 0) {
-            System.out.println("Something wrong with schedule");
             logger.logErrorEvent("RequestRateScheduler - Trying to work on an empty schedule");
             return 0;
         }

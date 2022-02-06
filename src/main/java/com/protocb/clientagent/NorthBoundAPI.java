@@ -1,6 +1,6 @@
 package com.protocb.clientagent;
 
-import com.protocb.clientagent.exchanges.ExperimentRecipe;
+import com.protocb.clientagent.dto.ExperimentRecipe;
 import com.protocb.clientagent.scheduler.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -46,6 +46,7 @@ public class NorthBoundAPI {
             System.out.println(experimentRecipe.toString());
 
             agentState.setExperimentSession(experimentRecipe.getExperimentSession());
+            agentState.setEventsToLog(experimentRecipe.getEventsToLog());
             agentState.setServerUrl(experimentRecipe.getServerUrl());
             agentState.setTfProbability(experimentRecipe.getTfProbability());
             agentState.setCircuitBreakerType(experimentRecipe.getCircuitBreakerType());

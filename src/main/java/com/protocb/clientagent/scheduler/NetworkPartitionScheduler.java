@@ -39,7 +39,7 @@ public class NetworkPartitionScheduler {
         public void run() {
             NetworkPartitionEvent networkPartitionEvent = getNextPartition();
             agentState.setNetworkPartition(networkPartitionEvent.isNetworkPartitioned(), networkPartitionEvent.getPartition());
-            logger.logSchedulingEvent("Network partition changed to - " + networkPartitionEvent.isNetworkPartitioned());
+            logger.logSchedulingEvent("Network Partition - " + networkPartitionEvent.isNetworkPartitioned());
         }
     }
 
@@ -64,8 +64,6 @@ public class NetworkPartitionScheduler {
             long delay = event.getTime() - Instant.now().getEpochSecond();
 
             if(delay <= 0) {
-                System.out.println("Not scheduling past event np");
-                logger.logErrorEvent("Network Partition event cannot be in past");
                 continue;
             }
 
@@ -79,7 +77,6 @@ public class NetworkPartitionScheduler {
     private NetworkPartitionEvent getNextPartition() {
 
         if(nextEventIndex < 0) {
-            System.out.println("Something wrong with schedule");
             logger.logErrorEvent("NetworkPartitionScheduler - Trying to work on an empty schedule");
             return NetworkPartitionEvent.builder().networkPartitioned(false).partition(new ArrayList<String>()).build();
         }

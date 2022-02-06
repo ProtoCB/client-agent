@@ -3,6 +3,7 @@ package com.protocb.clientagent.circuitbreaker.gedcb;
 import com.protocb.clientagent.circuitbreaker.CircuitBreakerState;
 import com.protocb.clientagent.circuitbreaker.gedcb.dto.GossipSetState;
 import com.protocb.clientagent.circuitbreaker.gedcb.dto.SetRevisionMessage;
+import com.protocb.clientagent.logger.Logger;
 import com.protocb.clientagent.proxy.Proxy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,6 +19,9 @@ import static com.protocb.clientagent.config.EnvironmentVariables.AGENT_URL;
 
 @Component
 public class GEDCBClientRegister {
+
+    @Autowired
+    private Logger logger;
 
     @Autowired
     private ScheduledExecutorService scheduledExecutorService;
@@ -93,6 +97,7 @@ public class GEDCBClientRegister {
             GossipSetState gossipSetState = this.getGossipSetState();
             GossipSetState response = proxy.sendGossipMessage(clientId, gossipSetState);
             this.consumeIncomingInformation(response);
+            logger.log("GSSENT", clientId);
         }
     }
 
@@ -139,12 +144,16 @@ public class GEDCBClientRegister {
 
         }
 
+        GossipSetState updatedGossipSetState = GossipSetState.builder()
+                .age(this.age)
+                .opinion(this.opinion)
+                .version(this.version)
+                .build();
+
+        logger.log("GSUPDT", updatedGossipSetState.toString());
+
         if(pushPullGossip) {
-            return GossipSetState.builder()
-                    .age(this.age)
-                    .opinion(this.opinion)
-                    .version(this.version)
-                    .build();
+            return updatedGossipSetState;
         } else {
             return GossipSetState.builder()
                     .age(new HashMap<>())
@@ -187,7 +196,7 @@ public class GEDCBClientRegister {
         int suspicionCount = 0;
 
         for(String clientId : this.opinion.keySet()) {
-            if(this.opinion.get(clientId) == NOT_CLOSED) {
+            if(!this.age.get(clientId).equals(maxAge) && this.opinion.get(clientId) == NOT_CLOSED) {
                 suspicionCount++;
             }
         }
@@ -214,6 +223,9 @@ public class GEDCBClientRegister {
                 .build();
 
         this.consumeIncomingInformation(gossipSetState);
+
+        logger.log("GSR", getGossipSetState().toString());
+
     }
 
 }

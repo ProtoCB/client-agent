@@ -1,6 +1,6 @@
 package com.protocb.clientagent.dto;
 
-import com.protocb.clientagent.config.ActivityState;
+import com.protocb.clientagent.scheduler.ActivityState;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;

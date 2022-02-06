@@ -1,7 +1,6 @@
 package com.protocb.clientagent.scheduler;
 
 import com.protocb.clientagent.AgentState;
-import com.protocb.clientagent.config.ActivityState;
 import com.protocb.clientagent.dto.ActivityChangeEvent;
 import com.protocb.clientagent.logger.Logger;
 import lombok.NoArgsConstructor;
@@ -40,10 +39,10 @@ public class ServerAvailabilityScheduler {
         public void run() {
             ActivityState activityState = getNextState();
             if(activityState == ActivityState.ACTIVE) {
-                logger.logSchedulingEvent("Server availability set to true");
+                logger.logSchedulingEvent("Server Available");
                 agentState.setServerAvailable(true);
             } else {
-                logger.logSchedulingEvent("Server availability set to false");
+                logger.logSchedulingEvent("Server Unavailable");
                 agentState.setServerAvailable(false);
             }
         }
@@ -70,8 +69,6 @@ public class ServerAvailabilityScheduler {
             long delay = event.getTime() - Instant.now().getEpochSecond();
 
             if(delay <= 0) {
-                System.out.println("Not scheduling past event sa");
-                logger.logErrorEvent("Server Availability Change event cannot be in past");
                 continue;
             }
 
@@ -85,7 +82,6 @@ public class ServerAvailabilityScheduler {
     private ActivityState getNextState() {
 
         if(nextEventIndex < 0) {
-            System.out.println("Something wrong with schedule");
             logger.logErrorEvent("ServerAvailabilityScheduler - Trying to work on an empty schedule");
             return ActivityState.INACTIVE;
         }

@@ -18,6 +18,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static com.protocb.clientagent.proxy.ResponseType.FAILURE;
+import static com.protocb.clientagent.proxy.ResponseType.SUCCESS;
+
 @Component
 public class Proxy implements Observer {
 
@@ -88,11 +91,13 @@ public class Proxy implements Observer {
             if(serverAvailable && !shouldFailTransiently && serverReachable) {
                 return sendActualRequest();
             } else {
-                return failRequest(failureInferenceTime);
+                Thread.sleep(failureInferenceTime);
+                return FAILURE;
             }
         } catch (Exception e) {
+            System.out.println("Proxy Error!");
             logger.logErrorEvent("Proxy Error! - " + e.getMessage());
-            return ResponseType.FAILURE;
+            return FAILURE;
         }
     }
 
@@ -110,16 +115,12 @@ public class Proxy implements Observer {
                     .bodyToMono(String.class)
                     .timeout(Duration.ofMillis(failureInferenceTime))
                     .block();
-            return ResponseType.SUCCESS;
-        } catch(Exception e) {
-            return ResponseType.FAILURE;
-        }
-    }
 
-    private ResponseType failRequest(int delay) throws InterruptedException {
-        System.out.println("SINK");
-        Thread.sleep(delay);
-        return ResponseType.FAILURE;
+            return SUCCESS;
+
+        } catch(Exception e) {
+            return FAILURE;
+        }
     }
 
     public GossipSetState sendGossipMessage(String clientUrl, GossipSetState gossipSetState) {
@@ -149,7 +150,7 @@ public class Proxy implements Observer {
             }
 
         } catch(Exception e) {
-            logger.logErrorEvent("Exception while sending gossip message");
+            logger.logErrorEvent("Failed to send gossip message");
             return GossipSetState.builder()
                     .age(new HashMap<>())
                     .opinion(new HashMap<>())

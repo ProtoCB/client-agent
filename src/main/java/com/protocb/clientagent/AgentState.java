@@ -19,6 +19,8 @@ public class AgentState implements Subject {
 
     private String experimentSession;
 
+    private List<String> eventsToLog;
+
     private boolean experimentUnderProgress;
 
     private String experimentStatus;
@@ -54,6 +56,7 @@ public class AgentState implements Subject {
         this.networkPartitioned = false;
         this.experimentSession = "Uninitialized";
         this.partitionMembers = new ArrayList<>();
+        this.eventsToLog = new ArrayList<>();
         this.serverUrl = "Uninitialized";
         this.tfProbability = 0;
         this.requestsPerSecond = 0;
@@ -87,6 +90,7 @@ public class AgentState implements Subject {
         this.networkPartitioned = false;
         this.experimentSession = "Uninitialized";
         this.partitionMembers = new ArrayList<>();
+        this.eventsToLog = new ArrayList<>();
         this.serverUrl = "Uninitialized";
         this.tfProbability = 0;
         this.requestsPerSecond = 0;
@@ -100,13 +104,11 @@ public class AgentState implements Subject {
     }
 
     public void setAlive(boolean alive) {
-        System.out.println("Alive = " + alive);
         this.alive = alive;
         this.notifyObservers();
     }
 
     public void setNetworkPartition(boolean networkPartitioned, List<String> partitionMembers) {
-        System.out.println("Partition = " + networkPartitioned);
         this.networkPartitioned = networkPartitioned;
         this.partitionMembers = partitionMembers;
         this.notifyObservers();
@@ -138,7 +140,6 @@ public class AgentState implements Subject {
     }
 
     public void setExperimentUnderProgress(boolean experimentUnderProgress) {
-        System.out.println("Experiment = " + experimentUnderProgress);
         this.experimentUnderProgress = experimentUnderProgress;
 
         if(experimentUnderProgress) {
@@ -170,5 +171,9 @@ public class AgentState implements Subject {
 
     public void setExperimentStatus(String experimentStatus) {
         this.experimentStatus = experimentStatus;
+    }
+
+    public void setEventsToLog(List<String> eventsToLog) {
+        this.eventsToLog = eventsToLog;
     }
 }

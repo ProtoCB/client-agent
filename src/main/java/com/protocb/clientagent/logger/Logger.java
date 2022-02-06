@@ -14,6 +14,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Instant;
+import java.util.List;
 
 import static com.protocb.clientagent.config.EnvironmentVariables.*;
 
@@ -21,6 +22,8 @@ import static com.protocb.clientagent.config.EnvironmentVariables.*;
 public class Logger {
 
     private String experimentSession;
+
+    private List<String> eventsToLog;
 
     private File sessionLog;
 
@@ -72,7 +75,9 @@ public class Logger {
 
     public void log(String eventId, String message) {
         try {
-            bufferedWriter.append(eventId + "," + Instant.now().toEpochMilli() + "," + message + "\n");
+            if(eventsToLog.contains(eventId)) {
+                bufferedWriter.append(eventId + "," + Instant.now().toEpochMilli() + "," + message + "\n");
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -89,5 +94,9 @@ public class Logger {
     public void setExperimentSession(String experimentSession) {
         this.experimentSession = experimentSession;
         createExperimentSessionLog();
+    }
+
+    public void setEventsToLog(List<String> eventsToLog) {
+        this.eventsToLog = eventsToLog;
     }
 }

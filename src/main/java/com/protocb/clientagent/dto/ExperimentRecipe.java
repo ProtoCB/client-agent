@@ -1,10 +1,6 @@
-package com.protocb.clientagent.exchanges;
+package com.protocb.clientagent.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.protocb.clientagent.dto.ActivityChangeEvent;
-import com.protocb.clientagent.dto.ExperimentSchedule;
-import com.protocb.clientagent.dto.NetworkPartitionEvent;
-import com.protocb.clientagent.dto.RequestRateChangeEvent;
 import lombok.*;
 
 import java.util.List;
@@ -17,6 +13,10 @@ public class ExperimentRecipe {
     @JsonProperty
     @NonNull
     private String experimentSession;
+
+    @JsonProperty
+    @NonNull
+    private List<String> eventsToLog;
 
     @JsonProperty
     @NonNull

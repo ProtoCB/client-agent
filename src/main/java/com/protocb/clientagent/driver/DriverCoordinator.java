@@ -40,7 +40,6 @@ public class DriverCoordinator implements Observer {
     }
 
     private void enableDriver() {
-        System.out.println("Enabling driver");
         logger.logSchedulingEvent("Enabling Driver");
         driverTask = scheduledExecutorService.schedule(driver, 0, TimeUnit.MILLISECONDS);
     }
@@ -53,6 +52,7 @@ public class DriverCoordinator implements Observer {
     public void update() {
         boolean agentAlive = agentState.isAlive();
         if(!isDriverActive() && agentAlive) {
+            System.out.println("driver");
             enableDriver();
         }
     }

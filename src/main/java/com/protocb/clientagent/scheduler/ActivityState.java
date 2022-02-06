@@ -1,4 +1,4 @@
-package com.protocb.clientagent.config;
+package com.protocb.clientagent.scheduler;
 
 public enum ActivityState {
     ACTIVE,

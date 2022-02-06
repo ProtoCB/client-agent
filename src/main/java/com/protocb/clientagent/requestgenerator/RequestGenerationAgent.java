@@ -42,15 +42,12 @@ public class RequestGenerationAgent implements Observer {
     }
 
     private void generateRequestsAtDelay(int delayInMilliseconds) {
-        System.out.println("Starting request generation @ " + delayInMilliseconds + " milSec");
-        logger.logSchedulingEvent("Starting request generation at " + requestsPerSecond + " per sec");
         generatorTask = scheduledExecutorService.scheduleWithFixedDelay(requestGenerator, 0, delayInMilliseconds, TimeUnit.MILLISECONDS);
     }
 
     private void disableRequestGeneration() {
         if(isGeneratorActive()) {
-            System.out.println("Disabling req generator");
-            logger.logSchedulingEvent("Disabling running request generator");
+            logger.logSchedulingEvent("Disabling Request Generator");
             generatorTask.cancel(true);
         }
     }

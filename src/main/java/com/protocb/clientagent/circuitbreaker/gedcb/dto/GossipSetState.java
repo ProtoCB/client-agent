@@ -8,6 +8,8 @@ import lombok.NonNull;
 
 import java.util.Map;
 
+import static com.protocb.clientagent.circuitbreaker.CircuitBreakerState.CLOSED;
+
 @Data
 @Builder
 public class GossipSetState {
@@ -22,4 +24,19 @@ public class GossipSetState {
     @NonNull
     @JsonProperty
     private Map<String, Integer> age;
+
+    @Override
+    public String toString() {
+        String s = "(" + version + ")";
+        for(String clientId:opinion.keySet()) {
+            s += "[" + clientId + ":(";
+            if(this.opinion.get(clientId) == CLOSED) {
+                s += "C,";
+            } else {
+                s += "S,";
+            }
+            s += this.age.get(clientId) + ")]";
+        }
+        return s;
+    }
 }

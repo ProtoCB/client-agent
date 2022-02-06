@@ -33,9 +33,7 @@ public class Driver implements Runnable {
         try {
 
             requestPool.resetPool();
-
             CircuitBreaker circuitBreaker = circuitBreakerFactory.getCircuitBreaker(agentState.getCircuitBreakerType());
-
             circuitBreaker.initialize(agentState.getCircuitBreakerParameters());
 
             while(true) {
@@ -55,7 +53,7 @@ public class Driver implements Runnable {
                     logger.log("S", "Successful Request");
                     circuitBreaker.registerSuccess();
                 } else if(responseType == ResponseType.FAILURE) {
-                    logger.log("F", "Request Failed");
+                    logger.log("F", "Failed Request");
                     circuitBreaker.registerFailure();
                 }
 
@@ -65,7 +63,7 @@ public class Driver implements Runnable {
 
         } catch (Exception e) {
             System.out.println("Driver Interrupted");
-            e.printStackTrace();
+            System.out.println(e.getMessage());
             logger.logErrorEvent("Driver Interrupted - " + e.getMessage());
         }
     }

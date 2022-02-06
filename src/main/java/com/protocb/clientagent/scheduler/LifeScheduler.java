@@ -1,7 +1,6 @@
 package com.protocb.clientagent.scheduler;
 
 import com.protocb.clientagent.AgentState;
-import com.protocb.clientagent.config.ActivityState;
 import com.protocb.clientagent.dto.ActivityChangeEvent;
 import com.protocb.clientagent.logger.Logger;
 import lombok.NoArgsConstructor;
@@ -40,11 +39,11 @@ public class LifeScheduler {
         public void run() {
             ActivityState activityState = getNextState();
             if(activityState == ActivityState.ACTIVE) {
-                logger.logSchedulingEvent("Agent set as alive");
                 agentState.setAlive(true);
+                logger.logSchedulingEvent("Agent - Alive");
             } else {
-                logger.logSchedulingEvent("Agent set as dead");
                 agentState.setAlive(false);
+                logger.logSchedulingEvent("Agent - Dead");
             }
         }
     }
@@ -71,8 +70,6 @@ public class LifeScheduler {
             long delay = event.getTime() - Instant.now().getEpochSecond();
 
             if(delay <= 0) {
-                System.out.println("Not scheduling past event life");
-                logger.logErrorEvent("Life event cannot be in past");
                 continue;
             }
 
@@ -86,7 +83,6 @@ public class LifeScheduler {
     private ActivityState getNextState() {
 
         if(nextEventIndex < 0) {
-            System.out.println("Something wrong with schedule");
             logger.logErrorEvent("LifeScheduler - Trying to work on an empty schedule");
             return ActivityState.INACTIVE;
         }

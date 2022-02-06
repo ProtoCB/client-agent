@@ -30,7 +30,7 @@ public class RequestPool {
 
             availableRequests.acquire();
             emptyRequestSlots.release();
-            logger.log("FETCH", "Fetched Request. " + availableRequests.availablePermits() + " requests left");
+            logger.log("FETCH", availableRequests.availablePermits() + " requests left");
 
         } catch (Exception e) {
             System.out.println("Fetch request failed");
@@ -43,8 +43,7 @@ public class RequestPool {
 
             emptyRequestSlots.acquire();
             availableRequests.release();
-            System.out.println("Added Request");
-            logger.log("REQ", "Added Request. " + availableRequests.availablePermits() + " requests available");
+            logger.log("REQ", availableRequests.availablePermits() + " requests available");
 
         } catch (Exception e) {
             System.out.printf("Adding request failed");
@@ -54,14 +53,18 @@ public class RequestPool {
 
     public void resetPool() {
         try {
+
             availableRequests.drainPermits();
             int occupiedSlots = BUFFER_SIZE - emptyRequestSlots.availablePermits();
+
             if(occupiedSlots > 0) {
                 emptyRequestSlots.release(occupiedSlots);
             } else {
                 emptyRequestSlots.acquire(-1 * occupiedSlots);
             }
+
             logger.logSchedulingEvent("Request pool reset");
+
         } catch(Exception e) {
             logger.logErrorEvent("Resetting request pool failed - " + e.getMessage());
         }

@@ -1,8 +1,6 @@
 package com.protocb.clientagent.scheduler;
 
 import com.protocb.clientagent.AgentState;
-import com.protocb.clientagent.config.ActivityState;
-import com.protocb.clientagent.dto.ActivityChangeEvent;
 import com.protocb.clientagent.dto.ExperimentSchedule;
 import com.protocb.clientagent.logger.Logger;
 import lombok.NoArgsConstructor;
@@ -58,11 +56,13 @@ public class ExperimentScheduler {
     }
 
     public void cancelExperiment() {
+
         for(ScheduledFuture scheduledEvent : schedule) {
             if(scheduledEvent != null) {
                 scheduledEvent.cancel(false);
             }
         }
+
         schedule.clear();
         activityStates.clear();
         logger.setExperimentSession("Uninitialized");
@@ -71,12 +71,11 @@ public class ExperimentScheduler {
     public void scheduleExperiment(ExperimentSchedule schedule) {
 
         logger.setExperimentSession(agentState.getExperimentSession());
-        System.out.println("Experiment log file created");
+        logger.setEventsToLog(agentState.getEventsToLog());
 
         long delay = schedule.getStart() - Instant.now().getEpochSecond();
 
         if(delay <= 0) {
-            System.out.println("Not scheduling past event exp");
             logger.logErrorEvent("Experiment's start cannot be in past");
         } else {
             activityStates.add(ActivityState.ACTIVE);
@@ -86,20 +85,15 @@ public class ExperimentScheduler {
         delay = schedule.getEnd() - Instant.now().getEpochSecond();
 
         if(delay <= 0) {
-            System.out.println("Not scheduling past event exp");
             logger.logErrorEvent("Experiment's end cannot be in past");
         } else {
             activityStates.add(ActivityState.INACTIVE);
             scheduledExecutorService.schedule(new ExperimentSchedulingTask(), delay, TimeUnit.SECONDS);
         }
 
-        scheduledExecutorService.schedule(new Runnable() {
-            @Override
-            public void run() {
+        scheduledExecutorService.schedule(() -> {
                 logger.shipExperimentSessionLog();
-                System.out.println("Experiment logs shipped");
                 agentState.setExperimentStatus("Logs Shipped");
-            }
         }, delay + 2, TimeUnit.SECONDS);
 
         nextEventIndex = 0;
@@ -108,7 +102,6 @@ public class ExperimentScheduler {
     private ActivityState getNextState() {
 
         if(nextEventIndex < 0) {
-            System.out.println("Something wrong with schedule");
             logger.logErrorEvent("ExperimentScheduler - Trying to work on an empty schedule");
             return ActivityState.INACTIVE;
         }

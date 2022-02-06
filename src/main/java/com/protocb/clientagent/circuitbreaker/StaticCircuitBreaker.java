@@ -1,6 +1,7 @@
 package com.protocb.clientagent.circuitbreaker;
 
-import lombok.ToString;
+import com.protocb.clientagent.logger.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -10,13 +11,17 @@ import java.util.List;
 import java.util.Map;
 
 import static com.protocb.clientagent.circuitbreaker.CircuitBreakerState.*;
+import static com.protocb.clientagent.circuitbreaker.WindowSlot.*;
 
 @Component
 public class StaticCircuitBreaker implements CircuitBreaker {
 
+    @Autowired
+    private Logger logger;
+
     private CircuitBreakerState circuitBreakerState;
 
-    private List<Integer> window;
+    private List<WindowSlot> window;
 
     private int failureThreshold;
 
@@ -30,39 +35,58 @@ public class StaticCircuitBreaker implements CircuitBreaker {
 
     private int index;
 
+    private String getCBWindow() {
+        String w = "|";
+        for(WindowSlot windowSlot:window) {
+            if(windowSlot == EMPTY) {
+                w += "E|";
+            } else if(windowSlot == SUCCESS) {
+                w += "S|";
+            } else if(windowSlot == FAILURE) {
+                w += "F|";
+            }
+        }
+        return w;
+    }
+
+    private void changeCircuitBreakerState(CircuitBreakerState circuitBreakerState) {
+        this.circuitBreakerState = circuitBreakerState;
+        logger.log("CBCHANGE", circuitBreakerState.toString());
+    }
+
     private void clearWindow() {
         for(int i = 0; i<window.size(); i++) {
-            window.set(i, -1);
+            window.set(i, EMPTY);
         }
+    }
+
+    private void openCircuitBreaker() {
+        changeCircuitBreakerState(OPEN);
+        clearWindow();
+        lastOpenAt = Instant.now().toEpochMilli() % 100000;
     }
 
     private void monitorForStateTransition() {
         int failures = 0;
         int successes = 0;
         for(int i = 0; i<window.size(); i++) {
-            if(window.get(i) == 2) failures++;
-            if(window.get(i) == 1) successes++;
+            if(window.get(i) == FAILURE) failures++;
+            if(window.get(i) == SUCCESS) successes++;
         }
 
-        if(circuitBreakerState == CLOSED) {
-            if(failures > failureThreshold) {
-                circuitBreakerState = OPEN;
-                clearWindow();
-                lastOpenAt = Instant.now().toEpochMilli() % 100000;
-            }
+        if(circuitBreakerState == CLOSED && failures > failureThreshold) {
+            openCircuitBreaker();
         } else if(circuitBreakerState == HALF_OPEN) {
             if(failures > halfOpenFailureThreshold) {
-                circuitBreakerState = OPEN;
-                clearWindow();
-                lastOpenAt = Instant.now().toEpochMilli() % 100000;
+                openCircuitBreaker();
             } else if(successes > halfOpenSuccessThreshold){
-                circuitBreakerState = CLOSED;
+                changeCircuitBreakerState(CLOSED);
                 clearWindow();
             }
         }
     }
 
-    private void registerResponse(int response) {
+    private void registerResponse(WindowSlot response) {
         window.set(index, response);
         index = (index + 1) % window.size();
         monitorForStateTransition();
@@ -70,21 +94,23 @@ public class StaticCircuitBreaker implements CircuitBreaker {
 
     @Override
     public void registerSuccess() {
-        registerResponse(1);
+        registerResponse(SUCCESS);
     }
 
     @Override
     public void registerFailure() {
-        registerResponse(2);
+        registerResponse(FAILURE);
     }
 
     @Override
     public boolean isCircuitBreakerOpen() {
-        System.out.println(circuitBreakerState + " | " + window.toString());
+
+        logger.log("CBSTATE", getCBWindow());
+
         if(circuitBreakerState == OPEN) {
             long timeElapsedSinceOpen = Instant.now().toEpochMilli() % 100000 - lastOpenAt;
             if(timeElapsedSinceOpen >= openDuration) {
-                circuitBreakerState = HALF_OPEN;
+                changeCircuitBreakerState(HALF_OPEN);
                 return false;
             }
             return true;
@@ -102,7 +128,7 @@ public class StaticCircuitBreaker implements CircuitBreaker {
         int windowSize = parameters.get("WS");
         lastOpenAt = 0;
         index = 0;
-        window = Arrays.asList(new Integer[windowSize]);
+        window = Arrays.asList(new WindowSlot[windowSize]);
         clearWindow();
         circuitBreakerState = CLOSED;
     }
