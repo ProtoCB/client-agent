@@ -52,7 +52,6 @@ public class DriverCoordinator implements Observer {
     public void update() {
         boolean agentAlive = agentState.isAlive();
         if(!isDriverActive() && agentAlive) {
-            System.out.println("driver");
             enableDriver();
         }
     }
