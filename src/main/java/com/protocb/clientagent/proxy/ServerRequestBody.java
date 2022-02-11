@@ -1,13 +1,13 @@
 package com.protocb.clientagent.proxy;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.protocb.clientagent.config.EnvironementVariables;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-
-import static com.protocb.clientagent.config.EnvironmentVariables.AGENT_URL;
 
 @Component
 @Getter
@@ -23,9 +23,12 @@ public class ServerRequestBody {
     @JsonProperty
     private long timestamp;
 
+    @Autowired
+    private EnvironementVariables environementVariables;
+
     @PostConstruct
     public void postConstruct() {
-        ip = AGENT_URL;
+        ip = environementVariables.getAgentIp();
         minLatency = 0;
         timestamp = 0;
     }

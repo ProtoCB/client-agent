@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 
-import static com.protocb.clientagent.config.EnvironmentVariables.GEDCB_ENDPOINT;
+import static com.protocb.clientagent.config.AgentConstants.GEDCB_ENDPOINT;
 
 @RestController
 @RequestMapping(GEDCB_ENDPOINT)

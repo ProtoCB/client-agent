@@ -6,9 +6,12 @@ import com.protocb.clientagent.circuitbreaker.CircuitBreaker;
 import com.protocb.clientagent.circuitbreaker.CircuitBreakerFactory;
 import com.protocb.clientagent.logger.Logger;
 import com.protocb.clientagent.proxy.ResponseType;
+import com.protocb.clientagent.proxy.ServerRequestBody;
 import com.protocb.clientagent.requestpool.RequestPool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.time.Instant;
 
 @Component
 public class Driver implements Runnable {
@@ -24,6 +27,9 @@ public class Driver implements Runnable {
 
     @Autowired
     private AgentState agentState;
+
+    @Autowired
+    private ServerRequestBody serverRequestBody;
 
     @Autowired
     private CircuitBreakerFactory circuitBreakerFactory;
@@ -47,13 +53,19 @@ public class Driver implements Runnable {
                     continue;
                 }
 
-                ResponseType responseType = proxy.sendRequestToServer();
+                long requestStartTime = Instant.now().toEpochMilli() % 1000000;
+                serverRequestBody.setMinLatency(agentState.getMinLatency());
+                serverRequestBody.setTimestamp(requestStartTime);
+
+                ResponseType responseType = proxy.sendRequestToServer(serverRequestBody);
+
+                long requestEndTime = Instant.now().toEpochMilli() % 1000000;
 
                 if(responseType == ResponseType.SUCCESS) {
-                    logger.log("S", "Successful Request");
+                    logger.log("S", Long.toString(requestEndTime - requestStartTime));
                     circuitBreaker.registerSuccess();
                 } else if(responseType == ResponseType.FAILURE) {
-                    logger.log("F", "Failed Request");
+                    logger.log("F", Long.toString(requestEndTime - requestStartTime));
                     circuitBreaker.registerFailure();
                 }
 

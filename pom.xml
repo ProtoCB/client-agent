@@ -11,6 +11,7 @@
 	<groupId>com.protocb</groupId>
 	<artifactId>client-agent</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+    <packaging>jar</packaging>
 	<name>client-agent</name>
 	<description>Client agent for ProtoCB prototyping test bed</description>
 	<properties>

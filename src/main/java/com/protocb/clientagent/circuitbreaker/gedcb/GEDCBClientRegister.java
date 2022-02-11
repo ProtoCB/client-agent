@@ -3,6 +3,7 @@ package com.protocb.clientagent.circuitbreaker.gedcb;
 import com.protocb.clientagent.circuitbreaker.CircuitBreakerState;
 import com.protocb.clientagent.circuitbreaker.gedcb.dto.GossipSetState;
 import com.protocb.clientagent.circuitbreaker.gedcb.dto.SetRevisionMessage;
+import com.protocb.clientagent.config.EnvironementVariables;
 import com.protocb.clientagent.logger.Logger;
 import com.protocb.clientagent.proxy.Proxy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,6 @@ import java.util.concurrent.TimeUnit;
 
 import static com.protocb.clientagent.circuitbreaker.CircuitBreakerState.CLOSED;
 import static com.protocb.clientagent.circuitbreaker.CircuitBreakerState.NOT_CLOSED;
-import static com.protocb.clientagent.config.EnvironmentVariables.AGENT_URL;
 
 @Component
 public class GEDCBClientRegister {
@@ -28,6 +28,9 @@ public class GEDCBClientRegister {
 
     @Autowired
     private Proxy proxy;
+
+    @Autowired
+    private EnvironementVariables environementVariables;
 
     private Integer maxAge;
 
@@ -50,7 +53,7 @@ public class GEDCBClientRegister {
         this.version = 0l;
         this.opinion = new HashMap<>();
         this.age = new HashMap<>();
-        this.selfId = AGENT_URL;
+        this.selfId = environementVariables.getAgentIp();
         this.pushPullGossip = pushPullGossip;
         this.gossipCount = gossipCount;
 

@@ -1,6 +1,7 @@
 package com.protocb.clientagent.heartbeat;
 
 import com.protocb.clientagent.AgentState;
+import com.protocb.clientagent.config.EnvironementVariables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -12,7 +13,7 @@ import java.time.Duration;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static com.protocb.clientagent.config.EnvironmentVariables.*;
+import static com.protocb.clientagent.config.AgentConstants.*;
 
 @Component
 public class HeartbeatDriver {
@@ -25,6 +26,9 @@ public class HeartbeatDriver {
 
     @Autowired
     private ScheduledExecutorService scheduledExecutorService;
+
+    @Autowired
+    private EnvironementVariables environementVariables;
 
     private WebClient client;
 
@@ -54,7 +58,7 @@ public class HeartbeatDriver {
 
     @PostConstruct
     public void scheduleHeartbeats() {
-        client = WebClient.create("http://" + CONTROLLER_URL);
+        client = WebClient.create("http://" + environementVariables.getControllerUrl());
         scheduledExecutorService.scheduleWithFixedDelay( () -> sendHeartbeat(), 2000, HEARTBEAT_DELAY, TimeUnit.MILLISECONDS);
     }
 

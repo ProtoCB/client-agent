@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.util.concurrent.Semaphore;
 
-import static com.protocb.clientagent.config.EnvironmentVariables.BUFFER_SIZE;
+import static com.protocb.clientagent.config.AgentConstants.BUFFER_SIZE;
 
 @Component
 public class RequestPool {

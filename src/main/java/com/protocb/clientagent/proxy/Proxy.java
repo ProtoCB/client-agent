@@ -43,8 +43,6 @@ public class Proxy implements Observer {
 
     private float tfProbability;
 
-    private int minLatency;
-
     private int failureInferenceTime;
 
     private WebClient client;
@@ -56,7 +54,6 @@ public class Proxy implements Observer {
         networkPartitioned = false;
         serverUrl = "Uninitialized";
         tfProbability = 0;
-        minLatency = 0;
         failureInferenceTime = 0;
         client = WebClient.create("http://" + serverUrl);
         agentState.registerObserver(this);
@@ -73,7 +70,6 @@ public class Proxy implements Observer {
         this.networkPartitioned = agentState.isNetworkPartitioned();
         this.allowList = agentState.getPartitionMembers();
         this.tfProbability = agentState.getTfProbability();
-        this.minLatency = agentState.getMinLatency();
         this.failureInferenceTime = agentState.getFailureInferenceTime();
 
         if(!this.serverUrl.equals(agentState.getServerUrl())) {
@@ -82,14 +78,14 @@ public class Proxy implements Observer {
         }
     }
 
-    public ResponseType sendRequestToServer() {
+    public ResponseType sendRequestToServer(ServerRequestBody serverRequestBody) {
         try {
 
             boolean shouldFailTransiently = Math.random() < tfProbability;
             boolean serverReachable = !networkPartitioned || allowList.contains(serverUrl);
 
             if(serverAvailable && !shouldFailTransiently && serverReachable) {
-                return sendActualRequest();
+                return sendActualRequest(serverRequestBody);
             } else {
                 Thread.sleep(failureInferenceTime);
                 return FAILURE;
@@ -101,14 +97,11 @@ public class Proxy implements Observer {
         }
     }
 
-    private ResponseType sendActualRequest() {
+    private ResponseType sendActualRequest(ServerRequestBody serverRequestBody) {
         try {
 
-            serverRequestBody.setMinLatency(minLatency);
-            serverRequestBody.setTimestamp(Instant.now().toEpochMilli() % 1000000);
-
             client.post()
-                    .uri("/api/v1/eastbound/")
+                    .uri("/api/v1/westbound/")
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(BodyInserters.fromValue(serverRequestBody))
                     .retrieve()
