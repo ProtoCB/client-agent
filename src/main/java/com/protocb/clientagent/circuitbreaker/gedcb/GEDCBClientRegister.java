@@ -14,8 +14,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import static com.protocb.clientagent.circuitbreaker.CircuitBreakerState.CLOSED;
-import static com.protocb.clientagent.circuitbreaker.CircuitBreakerState.NOT_CLOSED;
+import static com.protocb.clientagent.circuitbreaker.CircuitBreakerState.*;
 
 @Component
 public class GEDCBClientRegister {
@@ -38,6 +37,10 @@ public class GEDCBClientRegister {
 
     private Integer gossipCount;
 
+    private Integer suspicionGossipCount;
+
+    private Integer gossipMessageCount;
+
     private String selfId;
 
     private Long version;
@@ -48,7 +51,7 @@ public class GEDCBClientRegister {
 
     private ScheduledFuture gossipTask;
 
-    public void initialize(Integer maxAge, Integer gossipPeriod, Integer gossipCount, boolean pushPullGossip) {
+    public void initialize(Integer maxAge, Integer gossipPeriod, Integer gossipCount, Integer suspicionGossipCount, boolean pushPullGossip) {
         this.maxAge = maxAge;
         this.version = 0l;
         this.opinion = new HashMap<>();
@@ -56,6 +59,8 @@ public class GEDCBClientRegister {
         this.selfId = environementVariables.getAgentIp();
         this.pushPullGossip = pushPullGossip;
         this.gossipCount = gossipCount;
+        gossipMessageCount = gossipCount;
+        this.suspicionGossipCount = suspicionGossipCount;
 
         opinion.put(selfId, CLOSED);
         age.put(selfId, 0);
@@ -84,7 +89,7 @@ public class GEDCBClientRegister {
         List<String> clientIds = new ArrayList<>(this.opinion.keySet());
         List<String> selectedClients = new ArrayList<>();
 
-        while(selectedClients.size() < gossipCount && selectedClients.size() < clientIds.size() - 1) {
+        while(selectedClients.size() < gossipMessageCount && selectedClients.size() < clientIds.size() - 1) {
             int randomNumber = (int)(Math.random() * 1000);
             int index = randomNumber % clientIds.size();
             String clientId = clientIds.get(index);
@@ -168,8 +173,16 @@ public class GEDCBClientRegister {
     }
 
     public void updateSelfOpinion(CircuitBreakerState circuitBreakerState) {
-        this.opinion.put(selfId, circuitBreakerState);
+        CircuitBreakerState newCircuitBreakerState = circuitBreakerState == CLOSED ? CLOSED : NOT_CLOSED;
+        this.opinion.put(selfId, newCircuitBreakerState);
         this.age.put(selfId, 0);
+
+        if(circuitBreakerState == SUSPICION) {
+            gossipMessageCount = suspicionGossipCount;
+        } else {
+            gossipMessageCount = gossipCount;
+        }
+
     }
 
     private void incrementOpinionAge() {

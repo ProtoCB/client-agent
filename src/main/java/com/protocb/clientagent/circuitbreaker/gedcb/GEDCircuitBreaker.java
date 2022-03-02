@@ -62,6 +62,7 @@ public class GEDCircuitBreaker implements CircuitBreaker {
 
     private void changeCircuitBreakerState(CircuitBreakerState circuitBreakerState) {
         this.circuitBreakerState = circuitBreakerState;
+        gedcbClientRegister.updateSelfOpinion(circuitBreakerState);
         logger.log("CBCHANGE", circuitBreakerState.toString());
     }
 
@@ -80,7 +81,6 @@ public class GEDCircuitBreaker implements CircuitBreaker {
     private void closeCircuitBreaker() {
         changeCircuitBreakerState(CLOSED);
         clearWindow();
-        gedcbClientRegister.updateSelfOpinion(CLOSED);
     }
 
     private void monitorForStateTransition() {
@@ -94,7 +94,6 @@ public class GEDCircuitBreaker implements CircuitBreaker {
         if(circuitBreakerState == CLOSED && failures > softFailureThreshold) {
 
             changeCircuitBreakerState(SUSPICION);
-            gedcbClientRegister.updateSelfOpinion(NOT_CLOSED);
             if(gedcbClientRegister.isConsensusOnSuspicion()) openCircuitBreaker();
 
         } else if(circuitBreakerState == SUSPICION) {
@@ -170,9 +169,10 @@ public class GEDCircuitBreaker implements CircuitBreaker {
         int maxAge = parameters.get("maxAge");
         int gossipPeriod = parameters.get("gossipPeriod");
         int gossipCount = parameters.get("gossipCount");
+        int suspicionGossipCount = parameters.get("gossipCount");
         boolean pushPullGossip = parameters.get("pushPullGossip") == 1;
 
-        gedcbClientRegister.initialize(maxAge, gossipPeriod, gossipCount, pushPullGossip);
+        gedcbClientRegister.initialize(maxAge, gossipPeriod, gossipCount, suspicionGossipCount, pushPullGossip);
 
     }
 
