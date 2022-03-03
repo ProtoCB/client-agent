@@ -57,7 +57,7 @@ public class RequestGenerationAgent implements Observer {
     }
 
     @Override
-    public void update() {
+    public synchronized void update() {
         float newRate = agentState.getRequestsPerSecond();
         boolean alive = agentState.isAlive();
 

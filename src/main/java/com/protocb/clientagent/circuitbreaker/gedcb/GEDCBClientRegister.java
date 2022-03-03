@@ -86,6 +86,10 @@ public class GEDCBClientRegister {
 
     private void sendGossipMessages() {
 
+        System.out.println("GSSET");
+        System.out.println(opinion.toString());
+        System.out.println(age.toString());
+
         List<String> clientIds = new ArrayList<>(this.opinion.keySet());
         List<String> selectedClients = new ArrayList<>();
 
@@ -102,9 +106,11 @@ public class GEDCBClientRegister {
         this.incrementOpinionAge();
 
         for(String clientId : selectedClients) {
+            System.out.println("SEND-1");
             GossipSetState gossipSetState = this.getGossipSetState();
             GossipSetState response = proxy.sendGossipMessage(clientId, gossipSetState);
             this.consumeIncomingInformation(response);
+            System.out.println("SEND-2");
             logger.log("GSSENT", clientId);
         }
     }

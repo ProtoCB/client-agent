@@ -46,7 +46,7 @@ public class RequestPool {
             logger.log("REQ", availableRequests.availablePermits() + " requests available");
 
         } catch (Exception e) {
-            System.out.printf("Adding request failed");
+            System.out.println("Adding request failed");
             logger.logErrorEvent("Adding request failed - " + e.getMessage());
         }
     }

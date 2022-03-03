@@ -44,9 +44,9 @@ public class Driver implements Runnable {
 
             while(true) {
 
-                if(!agentState.isAlive()) break;
-
                 requestPool.fetchRequestOrWait();
+
+                if(!agentState.isAlive()) break;
 
                 if(circuitBreaker.isCircuitBreakerOpen()) {
                     logger.log("CBOPEN", "Circuit Breaker Open");

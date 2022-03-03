@@ -73,7 +73,13 @@ public class ExperimentScheduler {
         logger.setExperimentSession(agentState.getExperimentSession());
         logger.setEventsToLog(agentState.getEventsToLog());
 
+        System.out.println(agentState.getExperimentSession());
+        System.out.println(agentState.getEventsToLog());
+        System.out.println(schedule.toString());
+
         long delay = schedule.getStart() - Instant.now().getEpochSecond();
+
+        System.out.println("start delay: " + delay);
 
         if(delay <= 0) {
             logger.logErrorEvent("Experiment's start cannot be in past");
@@ -83,6 +89,8 @@ public class ExperimentScheduler {
         }
 
         delay = schedule.getEnd() - Instant.now().getEpochSecond();
+        System.out.println("end delay: " + delay);
+
 
         if(delay <= 0) {
             logger.logErrorEvent("Experiment's end cannot be in past");

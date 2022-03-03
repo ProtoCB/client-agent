@@ -49,7 +49,7 @@ public class DriverCoordinator implements Observer {
     }
 
     @Override
-    public void update() {
+    public synchronized void update() {
         boolean agentAlive = agentState.isAlive();
         if(!isDriverActive() && agentAlive) {
             enableDriver();

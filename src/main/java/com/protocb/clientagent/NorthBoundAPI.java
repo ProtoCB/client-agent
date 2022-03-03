@@ -73,6 +73,7 @@ public class NorthBoundAPI {
             return ResponseEntity.ok().body(null);
 
         } catch(Exception e) {
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(null);
         }
     }
@@ -98,6 +99,7 @@ public class NorthBoundAPI {
             return ResponseEntity.ok().body(null);
 
         } catch(Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(null);
         }
     }
