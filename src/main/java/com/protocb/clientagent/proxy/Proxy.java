@@ -5,6 +5,7 @@ import com.protocb.clientagent.circuitbreaker.gedcb.dto.GossipSetState;
 import com.protocb.clientagent.interaction.Observer;
 import com.protocb.clientagent.logger.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -84,12 +85,27 @@ public class Proxy implements Observer {
             boolean shouldFailTransiently = Math.random() < tfProbability;
             boolean serverReachable = !networkPartitioned || allowList.contains(serverUrl);
 
-            if(serverAvailable && !shouldFailTransiently && serverReachable) {
-                return sendActualRequest(serverRequestBody);
+            if(!shouldFailTransiently && serverReachable) {
+
+                long startTime = Instant.now().toEpochMilli() % 1000000;
+                ResponseType response = sendActualRequest(serverRequestBody);
+                long timeAtResponseReceipt = Instant.now().toEpochMilli() % 1000000;
+
+                long timeElapsed = timeAtResponseReceipt - startTime;
+
+                if(response == SUCCESS && timeElapsed < serverRequestBody.getMinLatency()) {
+                    Thread.sleep(serverRequestBody.getMinLatency() - timeElapsed);
+                } else if(response == FAILURE && timeElapsed < failureInferenceTime) {
+                    Thread.sleep(failureInferenceTime - timeElapsed);
+                }
+
+                return response;
+
             } else {
                 Thread.sleep(failureInferenceTime);
                 return FAILURE;
             }
+
         } catch (Exception e) {
             System.out.println("Proxy Error!");
             logger.logErrorEvent("Proxy Error! - " + e.getMessage());
@@ -100,18 +116,26 @@ public class Proxy implements Observer {
     private ResponseType sendActualRequest(ServerRequestBody serverRequestBody) {
         try {
 
-            client.post()
+            ServerResponseBody serverResponseBody = client.post()
                     .uri("/api/v1/westbound/")
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(BodyInserters.fromValue(serverRequestBody))
                     .retrieve()
-                    .bodyToMono(String.class)
+                    .onStatus(HttpStatus::is5xxServerError, clientResponse -> clientResponse.bodyToMono(String.class).map(Exception::new))
+                    .onStatus(HttpStatus::is4xxClientError, clientResponse -> clientResponse.bodyToMono(String.class).map(Exception::new))
+                    .bodyToMono(ServerResponseBody.class)
                     .timeout(Duration.ofMillis(failureInferenceTime))
                     .block();
 
-            return SUCCESS;
+            if(serverResponseBody.getServerAvailable()) {
+                return SUCCESS;
+            } else {
+                return FAILURE;
+            }
 
         } catch(Exception e) {
+            System.out.println(e.getMessage());
+            logger.logErrorEvent("Unplanned server-request failure");
             return FAILURE;
         }
     }
@@ -135,6 +159,7 @@ public class Proxy implements Observer {
 
             } else {
                 Thread.sleep(failureInferenceTime);
+                logger.log("GFAIL", "Planned gossip failure");
                 return GossipSetState.builder()
                         .age(new HashMap<>())
                         .opinion(new HashMap<>())
@@ -143,7 +168,7 @@ public class Proxy implements Observer {
             }
 
         } catch(Exception e) {
-            logger.logErrorEvent("Failed to send gossip message");
+            logger.logErrorEvent("Unplanned gossip failure");
             return GossipSetState.builder()
                     .age(new HashMap<>())
                     .opinion(new HashMap<>())
