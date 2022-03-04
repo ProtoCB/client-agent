@@ -86,10 +86,6 @@ public class GEDCBClientRegister {
 
     private void sendGossipMessages() {
 
-        System.out.println("GSSET");
-        System.out.println(opinion.toString());
-        System.out.println(age.toString());
-
         List<String> clientIds = new ArrayList<>(this.opinion.keySet());
         List<String> selectedClients = new ArrayList<>();
 
