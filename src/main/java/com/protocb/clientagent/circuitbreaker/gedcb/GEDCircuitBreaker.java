@@ -72,6 +72,14 @@ public class GEDCircuitBreaker implements CircuitBreaker {
         }
     }
 
+    private void clearSuccessesInWindow() {
+        for(int i = 0; i<window.size(); i++) {
+            if(window.get(i) == SUCCESS) {
+                window.set(i, EMPTY);
+            }
+        }
+    }
+
     private void openCircuitBreaker() {
         changeCircuitBreakerState(OPEN);
         clearWindow();
@@ -94,6 +102,7 @@ public class GEDCircuitBreaker implements CircuitBreaker {
         if(circuitBreakerState == CLOSED && failures > softFailureThreshold) {
 
             changeCircuitBreakerState(SUSPICION);
+            clearSuccessesInWindow();
             if(gedcbClientRegister.isConsensusOnSuspicion()) openCircuitBreaker();
 
         } else if(circuitBreakerState == SUSPICION) {

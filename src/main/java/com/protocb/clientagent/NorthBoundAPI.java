@@ -32,9 +32,6 @@ public class NorthBoundAPI {
     private ExperimentScheduler experimentScheduler;
 
     @Autowired
-    private ServerAvailabilityScheduler serverAvailabilityScheduler;
-
-    @Autowired
     private EnvironementVariables environementVariables;
 
     @PostMapping("/schedule-experiment")
@@ -65,7 +62,6 @@ public class NorthBoundAPI {
             requestRateScheduler.scheduleExperiment(experimentRecipe.getRequestRateSchedule());
             lifeScheduler.scheduleExperiment(experimentRecipe.getClientLifeSchedule());
             networkPartitionScheduler.scheduleExperiment(experimentRecipe.getNetworkPartitionSchedule());
-            serverAvailabilityScheduler.scheduleExperiment(experimentRecipe.getServerAvailabilitySchedule());
             experimentScheduler.scheduleExperiment(experimentRecipe.getExperimentSchedule());
 
             System.out.println("Experiment Scheduled - " + experimentRecipe.getExperimentSession());
@@ -92,7 +88,6 @@ public class NorthBoundAPI {
             lifeScheduler.cancelExperiment();
             requestRateScheduler.cancelExperiment();
             networkPartitionScheduler.cancelExperiment();
-            serverAvailabilityScheduler.cancelExperiment();
 
             agentState.resetAgent();
 

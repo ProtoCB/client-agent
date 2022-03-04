@@ -38,8 +38,6 @@ public class Proxy implements Observer {
 
     private List<String> allowList;
 
-    private boolean serverAvailable;
-
     private String serverUrl;
 
     private float tfProbability;
@@ -51,7 +49,6 @@ public class Proxy implements Observer {
     @PostConstruct
     private void postContruct() {
         allowList = new ArrayList<>();
-        serverAvailable = false;
         networkPartitioned = false;
         serverUrl = "Uninitialized";
         tfProbability = 0;
@@ -67,7 +64,6 @@ public class Proxy implements Observer {
 
     @Override
     public void update() {
-        this.serverAvailable = agentState.isServerAvailable();
         this.networkPartitioned = agentState.isNetworkPartitioned();
         this.allowList = agentState.getPartitionMembers();
         this.tfProbability = agentState.getTfProbability();
@@ -147,7 +143,7 @@ public class Proxy implements Observer {
             boolean clientReachable = !networkPartitioned || allowList.contains(clientUrl);
 
             if(!shouldFailTransiently && clientReachable) {
-                return WebClient.create(clientUrl)
+                return WebClient.create("http://" + clientUrl)
                         .post()
                         .uri("/api/v1/gedcb/gossip")
                         .contentType(MediaType.APPLICATION_JSON)

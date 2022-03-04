@@ -31,9 +31,9 @@ public class GossipSetState {
         for(String clientId:opinion.keySet()) {
             s += "[" + clientId + ":(";
             if(this.opinion.get(clientId) == CLOSED) {
-                s += "C,";
+                s += "C-";
             } else {
-                s += "S,";
+                s += "S-";
             }
             s += this.age.get(clientId) + ")]";
         }

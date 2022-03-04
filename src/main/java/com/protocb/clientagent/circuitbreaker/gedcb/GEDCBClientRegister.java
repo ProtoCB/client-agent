@@ -106,11 +106,9 @@ public class GEDCBClientRegister {
         this.incrementOpinionAge();
 
         for(String clientId : selectedClients) {
-            System.out.println("SEND-1");
             GossipSetState gossipSetState = this.getGossipSetState();
             GossipSetState response = proxy.sendGossipMessage(clientId, gossipSetState);
             this.consumeIncomingInformation(response);
-            System.out.println("SEND-2");
             logger.log("GSSENT", clientId);
         }
     }
@@ -118,6 +116,7 @@ public class GEDCBClientRegister {
     public GossipSetState consumeIncomingInformation(GossipSetState incomingState) {
 
         if(this.version > incomingState.getVersion()) {
+            logger.log("GSREJECT", "Rejecting old version message");
             return GossipSetState.builder()
                     .age(new HashMap<>())
                     .opinion(new HashMap<>())

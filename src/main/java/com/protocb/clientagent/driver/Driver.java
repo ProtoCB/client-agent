@@ -36,17 +36,15 @@ public class Driver implements Runnable {
 
     @Override
     public void run() {
+        requestPool.resetPool();
+        CircuitBreaker circuitBreaker = circuitBreakerFactory.getCircuitBreaker(agentState.getCircuitBreakerType());
+        circuitBreaker.reset();
+        circuitBreaker.initialize(agentState.getCircuitBreakerParameters());
         try {
-
-            requestPool.resetPool();
-            CircuitBreaker circuitBreaker = circuitBreakerFactory.getCircuitBreaker(agentState.getCircuitBreakerType());
-            circuitBreaker.initialize(agentState.getCircuitBreakerParameters());
 
             while(true) {
 
                 requestPool.fetchRequestOrWait();
-
-                if(!agentState.isAlive()) break;
 
                 if(circuitBreaker.isCircuitBreakerOpen()) {
                     logger.log("CBOPEN", "Circuit Breaker Open");
@@ -70,12 +68,8 @@ public class Driver implements Runnable {
                 }
 
             }
-
-            circuitBreaker.reset();
-
         } catch (Exception e) {
             System.out.println("Driver Interrupted");
-            System.out.println(e.getMessage());
             logger.logErrorEvent("Driver Interrupted - " + e.getMessage());
         }
     }

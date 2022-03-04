@@ -18,14 +18,18 @@ public class CircuitBreakerFactory {
 
     public CircuitBreaker getCircuitBreaker(String type) {
         if(type.equals("Static")) {
-            staticCircuitBreaker.reset();
             return staticCircuitBreaker;
         } else if(type.equals("GEDCB")) {
-            gedCircuitBreaker.reset();
             return gedCircuitBreaker;
         } else {
             return closedCircuit;
         }
+    }
+
+    public void resetAllCircuitBreakers() {
+        staticCircuitBreaker.reset();
+        gedCircuitBreaker.reset();
+        closedCircuit.reset();
     }
 
 

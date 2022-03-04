@@ -31,8 +31,6 @@ public class AgentState implements Subject {
 
     private List<String> partitionMembers;
 
-    private boolean serverAvailable;
-
     private String serverUrl;
 
     private float tfProbability;
@@ -127,11 +125,6 @@ public class AgentState implements Subject {
     public void setExperimentSession(String experimentSession) {
         this.experimentSession = experimentSession;
         this.experimentStatus = "Scheduled";
-    }
-
-    public void setServerAvailable(boolean serverAvailable) {
-        this.serverAvailable = serverAvailable;
-        this.notifyObservers();
     }
 
     public void setRequestsPerSecond(float requestsPerSecond) {

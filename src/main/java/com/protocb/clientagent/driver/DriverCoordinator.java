@@ -1,6 +1,7 @@
 package com.protocb.clientagent.driver;
 
 import com.protocb.clientagent.AgentState;
+import com.protocb.clientagent.circuitbreaker.CircuitBreakerFactory;
 import com.protocb.clientagent.interaction.Observer;
 import com.protocb.clientagent.logger.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,9 @@ public class DriverCoordinator implements Observer {
     @Autowired
     private Driver driver;
 
+    @Autowired
+    private CircuitBreakerFactory circuitBreakerFactory;
+
     private ScheduledFuture driverTask;
 
     @PostConstruct
@@ -37,6 +41,15 @@ public class DriverCoordinator implements Observer {
     @PreDestroy
     private void preDestroy() {
         agentState.removeObserver(this);
+    }
+
+    private void diableDriver() {
+        if(isDriverActive()) {
+            logger.logSchedulingEvent("Disabling Driver");
+            driverTask.cancel(true);
+            circuitBreakerFactory.resetAllCircuitBreakers();
+            logger.logSchedulingEvent("All circuit breakers reset");
+        }
     }
 
     private void enableDriver() {
@@ -53,6 +66,8 @@ public class DriverCoordinator implements Observer {
         boolean agentAlive = agentState.isAlive();
         if(!isDriverActive() && agentAlive) {
             enableDriver();
+        } else if(isDriverActive() && !agentAlive) {
+            diableDriver();
         }
     }
 }
