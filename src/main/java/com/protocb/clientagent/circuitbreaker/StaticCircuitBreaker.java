@@ -74,12 +74,12 @@ public class StaticCircuitBreaker implements CircuitBreaker {
             if(window.get(i) == SUCCESS) successes++;
         }
 
-        if(circuitBreakerState == CLOSED && failures > failureThreshold) {
+        if(circuitBreakerState == CLOSED && failures >= failureThreshold) {
             openCircuitBreaker();
         } else if(circuitBreakerState == HALF_OPEN) {
-            if(failures > halfOpenFailureThreshold) {
+            if(failures >= halfOpenFailureThreshold) {
                 openCircuitBreaker();
-            } else if(successes > halfOpenSuccessThreshold){
+            } else if(successes >= halfOpenSuccessThreshold){
                 changeCircuitBreakerState(CLOSED);
                 clearWindow();
             }

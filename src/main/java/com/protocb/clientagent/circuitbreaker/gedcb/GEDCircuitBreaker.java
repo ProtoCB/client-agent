@@ -99,7 +99,7 @@ public class GEDCircuitBreaker implements CircuitBreaker {
             if(window.get(i) == SUCCESS) successes++;
         }
 
-        if(circuitBreakerState == CLOSED && failures > softFailureThreshold) {
+        if(circuitBreakerState == CLOSED && failures >= softFailureThreshold) {
 
             changeCircuitBreakerState(SUSPICION);
             clearSuccessesInWindow();
@@ -107,17 +107,17 @@ public class GEDCircuitBreaker implements CircuitBreaker {
 
         } else if(circuitBreakerState == SUSPICION) {
 
-            if(failures > hardFailureThreshold || gedcbClientRegister.isConsensusOnSuspicion()) {
+            if(failures >= hardFailureThreshold || gedcbClientRegister.isConsensusOnSuspicion()) {
                 openCircuitBreaker();
-            } else if(successes > suspicionSuccessThreshold) {
+            } else if(successes >= suspicionSuccessThreshold) {
                 closeCircuitBreaker();
             }
 
         } else if(circuitBreakerState == HALF_OPEN) {
 
-            if(failures > halfOpenFailureThreshold) {
+            if(failures >= halfOpenFailureThreshold) {
                 openCircuitBreaker();
-            } else if(successes > halfOpenSuccessThreshold){
+            } else if(successes >= halfOpenSuccessThreshold){
                 closeCircuitBreaker();
             }
 
