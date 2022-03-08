@@ -109,21 +109,17 @@ public class GEDCBClientRegister {
         }
     }
 
-    public GossipSetState consumeIncomingInformation(GossipSetState incomingState) {
+    public synchronized GossipSetState consumeIncomingInformation(GossipSetState incomingState) {
 
         if(this.version > incomingState.getVersion()) {
-            logger.log("GSREJECT", "Rejecting old version message");
-            return GossipSetState.builder()
-                    .age(new HashMap<>())
-                    .opinion(new HashMap<>())
-                    .version(-1l)
-                    .build();
+            logger.log("GSREJECT", "Rejecting old version message - " + incomingState.getVersion());
+            return new GossipSetState(-1l, new HashMap<>(), new HashMap<>());
         }
 
         if(this.version < incomingState.getVersion()) {
 
             Set<String> receivedClientIds = incomingState.getOpinion().keySet();
-            Set<String> clientIds = this.opinion.keySet();
+            Set<String> clientIds = new HashSet<>(this.opinion.keySet());
 
             for(String clientId : clientIds) {
                 if(!receivedClientIds.contains(clientId)) {
@@ -153,27 +149,19 @@ public class GEDCBClientRegister {
 
         }
 
-        GossipSetState updatedGossipSetState = GossipSetState.builder()
-                .age(this.age)
-                .opinion(this.opinion)
-                .version(this.version)
-                .build();
+        GossipSetState updatedGossipSetState = new GossipSetState(this.version, this.opinion, this.age);
 
         logger.log("GSUPDT", updatedGossipSetState.toString());
 
         if(pushPullGossip) {
             return updatedGossipSetState;
         } else {
-            return GossipSetState.builder()
-                    .age(new HashMap<>())
-                    .opinion(new HashMap<>())
-                    .version(-1l)
-                    .build();
+            return new GossipSetState(-1l, new HashMap<>(), new HashMap<>());
         }
 
     }
 
-    public void updateSelfOpinion(CircuitBreakerState circuitBreakerState) {
+    public synchronized void updateSelfOpinion(CircuitBreakerState circuitBreakerState) {
         CircuitBreakerState newCircuitBreakerState = circuitBreakerState == CLOSED ? CLOSED : NOT_CLOSED;
         this.opinion.put(selfId, newCircuitBreakerState);
         this.age.put(selfId, 0);
@@ -198,11 +186,7 @@ public class GEDCBClientRegister {
     }
 
     private GossipSetState getGossipSetState() {
-        return GossipSetState.builder()
-                .age(this.age)
-                .opinion(this.opinion)
-                .version(this.version)
-                .build();
+        return new GossipSetState(this.version, this.opinion, this.age);
     }
 
     public boolean isConsensusOnSuspicion() {
@@ -233,11 +217,7 @@ public class GEDCBClientRegister {
             age.put(clientId, maxAge);
         }
 
-        GossipSetState gossipSetState = GossipSetState.builder()
-                .age(age)
-                .opinion(opinion)
-                .version(setRevisionMessage.getVersion())
-                .build();
+        GossipSetState gossipSetState = new GossipSetState(setRevisionMessage.getVersion(), opinion, age);
 
         this.consumeIncomingInformation(gossipSetState);
 

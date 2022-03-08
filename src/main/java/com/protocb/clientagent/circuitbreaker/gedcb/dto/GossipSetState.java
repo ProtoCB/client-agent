@@ -2,16 +2,15 @@ package com.protocb.clientagent.circuitbreaker.gedcb.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.protocb.clientagent.circuitbreaker.CircuitBreakerState;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NonNull;
+import lombok.*;
 
 import java.util.Map;
 
 import static com.protocb.clientagent.circuitbreaker.CircuitBreakerState.CLOSED;
 
 @Data
-@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class GossipSetState {
     @NonNull
     @JsonProperty

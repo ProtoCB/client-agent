@@ -149,6 +149,8 @@ public class Proxy implements Observer {
                         .contentType(MediaType.APPLICATION_JSON)
                         .body(BodyInserters.fromValue(gossipSetState))
                         .retrieve()
+                        .onStatus(HttpStatus::is5xxServerError, clientResponse -> clientResponse.bodyToMono(String.class).map(Exception::new))
+                        .onStatus(HttpStatus::is4xxClientError, clientResponse -> clientResponse.bodyToMono(String.class).map(Exception::new))
                         .bodyToMono(GossipSetState.class)
                         .timeout(Duration.ofMillis(failureInferenceTime))
                         .block();
@@ -156,20 +158,14 @@ public class Proxy implements Observer {
             } else {
                 Thread.sleep(failureInferenceTime);
                 logger.log("GFAIL", "Planned gossip failure");
-                return GossipSetState.builder()
-                        .age(new HashMap<>())
-                        .opinion(new HashMap<>())
-                        .version(-1l)
-                        .build();
+                return new GossipSetState(-1l, new HashMap<>(), new HashMap<>());
             }
 
         } catch(Exception e) {
+            e.printStackTrace();
+            logger.logErrorEvent(e.getMessage());
             logger.logErrorEvent("Unplanned gossip failure");
-            return GossipSetState.builder()
-                    .age(new HashMap<>())
-                    .opinion(new HashMap<>())
-                    .version(-1l)
-                    .build();
+            return new GossipSetState(-1l, new HashMap<>(), new HashMap<>());
         }
     }
 

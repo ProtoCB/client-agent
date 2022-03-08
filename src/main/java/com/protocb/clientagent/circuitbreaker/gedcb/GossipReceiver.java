@@ -39,11 +39,7 @@ public class GossipReceiver {
         } catch(Exception e) {
             System.out.println(e.getMessage());
             logger.logErrorEvent("Recevied gossip message when not accepting");
-            GossipSetState response = GossipSetState.builder()
-                    .opinion(new HashMap<>())
-                    .age(new HashMap<>())
-                    .version(-1l)
-                    .build();
+            GossipSetState response = new GossipSetState(-1l, new HashMap<>(), new HashMap<>());
             return ResponseEntity.ok().body(response);
         }
     }
@@ -62,7 +58,8 @@ public class GossipReceiver {
 
         } catch(Exception e) {
             System.out.println(e.getMessage());
-            logger.logErrorEvent("Recevied GSR message when not accepting");
+            e.printStackTrace();
+            logger.logErrorEvent("Exception in GSR - " + e.getMessage());
             return ResponseEntity.ok().body(null);
         }
     }
