@@ -43,7 +43,7 @@ public class DriverCoordinator implements Observer {
         agentState.removeObserver(this);
     }
 
-    private void diableDriver() {
+    private void disableDriver() {
         if(isDriverActive()) {
             logger.logSchedulingEvent("Disabling Driver");
             driverTask.cancel(true);
@@ -67,7 +67,7 @@ public class DriverCoordinator implements Observer {
         if(!isDriverActive() && agentAlive) {
             enableDriver();
         } else if(isDriverActive() && !agentAlive) {
-            diableDriver();
+            disableDriver();
         }
     }
 }
